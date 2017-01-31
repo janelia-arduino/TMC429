@@ -14,75 +14,102 @@
 #endif
 #include "SPI.h"
 
+#include "Streaming.h"
+
 
 class TMC429
 {
 public:
-  TMC429();
-  // TMC429(int cs_pin);
-  // TMC429(int cs_pin, int reset_pin);
+  TMC429(const size_t cs_pin);
 
-  // void setup(int ic_count=1, boolean spi_reset=false);
-  // void setChannels(uint32_t channels);
-  // void setChannelOn(int channel);
-  // void setChannelOff(int channel);
-  // void setChannelsOn(uint32_t channels);
-  // void setChannelsOff(uint32_t channels);
-  // void toggleChannel(int channel);
-  // void toggleChannels(uint32_t channels);
-  // void toggleAllChannels();
-  // void setAllChannelsOn();
-  // void setAllChannelsOff();
-  // void setChannelOnAllOthersOff(int channel);
-  // void setChannelOffAllOthersOn(int channel);
-  // void setChannelsOnAllOthersOff(uint32_t channels);
-  // void setChannelsOffAllOthersOn(uint32_t channels);
-  // uint32_t getChannelsOn();
-  // int getChannelCount();
-  // void reset();
-  // void setChannelsMap(uint32_t channels);
-  // void setChannelMapTrue(int channel);
-  // void setChannelMapFalse(int channel);
-  // void setAllChannelsMapTrue();
-  // void setAllChannelsMapFalse();
-  // void setChannelsBoolean(uint32_t bool_state);
-  // void setChannelBooleanAnd(int channel);
-  // void setChannelBooleanOr(int channel);
-  // void setAllChannelsBooleanAnd();
-  // void setAllChannelsBooleanOr();
+  void setup();
+  void test();
+
+  uint32_t getPositionTarget(size_t motor);
+  uint32_t getPositionActual(size_t motor);
+
+  uint32_t getTypeVersion();
+
+  struct Status
+  {
+    uint8_t at_target_position_0 : 1;
+    uint8_t switch_left_0 : 1;
+    uint8_t at_target_position_1 : 1;
+    uint8_t switch_left_1 : 1;
+    uint8_t at_target_position_2 : 1;
+    uint8_t switch_left_2 : 1;
+    uint8_t cdgw : 1;
+    uint8_t interrupt : 1;
+  };
+
+  Status getStatus();
 
 private:
-  // const static int IC_COUNT_MIN = 1;
-  // const static int IC_COUNT_MAX = 4;
+  // SPISettings
+  const static uint32_t SPI_CLOCK = 1000000;
+  const static uint8_t SPI_BIT_ORDER = MSBFIRST;
+  const static uint8_t SPI_MODE = SPI_MODE3;
 
-  // const static int CHANNEL_COUNT_PER_IC = 8;
-  // const static int CHANNEL_COUNT_MAX = 32;
+  const static uint8_t MOTOR_COUNT = 3;
 
-  // const static int RESET_DELAY = 200;
+  Status status_;
 
-  // const static byte CMD_DIAGNOSIS = 0b11<<6;
-  // const static byte CMD_READ = 0b01<<6;
-  // const static byte CMD_RESET = 0b10<<6;
-  // const static byte CMD_WRITE = 0b11<<6;
+  // MOSI Datagrams
+  union MosiDatagram
+  {
+    struct Fields
+    {
+      uint32_t data : 24;
+      uint8_t rw : 1;
+      uint8_t address : 4;
+      uint8_t smda : 2;
+      uint8_t rrs : 1;
+    } fields;
+    uint32_t uint32;
+  };
+  const static uint8_t RW_READ = 1;
+  const static uint8_t RW_WRITE = 0;
 
-  // const static byte ADDR_MAP = 0b001; // Input Mapping Register
-  // const static byte ADDR_BOL = 0b010; // Boolean Operation Register
-  // const static byte ADDR_OVL = 0b011; // Overload Behavior Register
-  // const static byte ADDR_OVT = 0b100; // Overtemperature Behavior Register
-  // const static byte ADDR_SLE = 0b101; // Switching Speed / Slew Rate Register
-  // const static byte ADDR_STA = 0b110; // Output State Register
-  // const static byte ADDR_CTL = 0b111; // Serial Output Control Register
+  // IDX
+  const static uint8_t ADDRESS_X_TARGET = 0b0000;
+  const static uint8_t ADDRESS_X_ACTUAL = 0b0001;
+  const static uint8_t ADDRESS_V_MIN = 0b0010;
+  const static uint8_t ADDRESS_V_MAX = 0b0011;
+  const static uint8_t ADDRESS_V_TARGET = 0b0100;
+  const static uint8_t ADDRESS_V_ACTUAL = 0b0101;
 
-  // int cs_pin_;
-  // int reset_pin_;
-  // boolean initialized_;
-  // uint32_t channels_;
-  // uint32_t mapped_;
-  // uint32_t bool_state_;
-  // int ic_count_;
-  // boolean spi_reset_;
+  // JDX
+  const static uint8_t ADDRESS_POWER_DOWN = 0b1000;
+  const static uint8_t ADDRESS_TYPE_VERSION_429 = 0b1001;
 
-  void spiBegin();
+  const static uint8_t SMDA_COMMON = 0b11;
+
+  const static uint8_t RRS_REGISTER = 0;
+  const static uint8_t RRS_RAM = 1;
+
+  // MISO Datagrams
+  union MisoDatagram
+  {
+    struct Fields
+    {
+      uint32_t data : 24;
+      Status status;
+      // uint32_t at_target_position_0 : 1;
+      // uint32_t switch_left_0 : 1;
+      // uint32_t at_target_position_1 : 1;
+      // uint32_t switch_left_1 : 1;
+      // uint32_t at_target_position_2 : 1;
+      // uint32_t switch_left_2 : 1;
+      // uint32_t cdgw : 6;
+      // uint32_t interrupt : 1;
+    } fields;
+    uint32_t uint32;
+  };
+
+  size_t cs_pin_;
+
+  uint32_t readRegister(const uint8_t smda, const uint8_t address);
+  MisoDatagram writeRead(const MosiDatagram datagram_write);
 };
 
 #endif
