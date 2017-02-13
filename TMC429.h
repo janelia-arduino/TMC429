@@ -23,10 +23,16 @@ public:
   TMC429(const size_t cs_pin);
 
   void setup();
-  void test();
 
   uint32_t getPositionTarget(size_t motor);
+  void setPositionTarget(size_t motor, uint32_t position);
   uint32_t getPositionActual(size_t motor);
+
+  uint16_t getVelocityMin(size_t motor);
+  void setVelocityMin(size_t motor, uint16_t velocity);
+
+  uint16_t getVelocityMax(size_t motor);
+  void setVelocityMax(size_t motor, uint16_t velocity);
 
   uint32_t getTypeVersion();
 
@@ -77,6 +83,9 @@ private:
   const static uint8_t ADDRESS_V_MAX = 0b0011;
   const static uint8_t ADDRESS_V_TARGET = 0b0100;
   const static uint8_t ADDRESS_V_ACTUAL = 0b0101;
+  const static uint8_t ADDRESS_A_MAX = 0b0110;
+  const static uint8_t ADDRESS_A_ACTUAL = 0b0111;
+  const static uint8_t ADDRESS_A_THRESHOLD = 0b1000;
 
   // JDX
   const static uint8_t ADDRESS_POWER_DOWN = 0b1000;
@@ -109,6 +118,7 @@ private:
   size_t cs_pin_;
 
   uint32_t readRegister(const uint8_t smda, const uint8_t address);
+  void writeRegister(const uint8_t smda, const uint8_t address, const uint32_t data);
   MisoDatagram writeRead(const MosiDatagram datagram_write);
 };
 

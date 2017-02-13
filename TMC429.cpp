@@ -25,63 +25,6 @@ void TMC429::setup()
   SPI.begin();
 }
 
-void TMC429::test()
-{
-  uint32_t type_version = getTypeVersion();
-  Serial << "type_version: " << _HEX(type_version) << "\n";
-
-  uint32_t position_target = getPositionTarget(0);
-  Serial << "position_target: " << position_target << "\n";
-
-  uint32_t position_actual = getPositionActual(0);
-  Serial << "position_actual: " << position_actual << "\n";
-
-  Status status = getStatus();
-  Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
-  Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
-  Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
-  Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
-  Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
-  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n\n";
-
-  // MosiDatagram datagram_write;
-  // datagram_write.fields.rrs = RRS_REGISTER;
-  // datagram_write.fields.address = ADDRESS_TYPE_VERSION_429;
-  // datagram_write.fields.smda = SMDA_COMMON;
-  // datagram_write.fields.rw = RW_READ;
-  // datagram_write.fields.data = 0;
-  // Serial << "sizeof(datagram_write): " << sizeof(datagram_write) << "\n";
-  // Serial << "datagram_write: " << _HEX(datagram_write.uint32) << "\n";
-
-  // // uint32_t datagram_write = 0x7f000000;
-  // // uint32_t datagram_write = 0x73000000;
-  // // uint32_t datagram_write = 0x1a000123;
-  // // uint32_t datagram_write = 0x1b000000;
-  // // Serial << "datagram_write = " << _HEX(datagram_write) << "\n";
-  // // uint32_t datagram_read = writeRead(datagram_write);
-  // MisoDatagram datagram_read = writeRead(datagram_write);
-  // Serial << "datagram_read = " << _HEX(datagram_read.uint32) << "\n";
-  // Serial << "datagram_read.fields.data = " << _HEX(datagram_read.fields.data) << "\n";
-  // Serial << "datagram_read.fields.status.at_target_position_0 = " << !bool(datagram_read.fields.status.at_target_position_0) << "\n";
-  // Serial << "datagram_read.fields.status.switch_left_0 = " << !bool(datagram_read.fields.status.switch_left_0) << "\n";
-  // Serial << "datagram_read.fields.status.at_target_position_1 = " << !bool(datagram_read.fields.status.at_target_position_1) << "\n";
-  // Serial << "datagram_read.fields.status.switch_left_1 = " << !bool(datagram_read.fields.status.switch_left_1) << "\n";
-  // Serial << "datagram_read.fields.status.at_target_position_2 = " << !bool(datagram_read.fields.status.at_target_position_2) << "\n";
-  // Serial << "datagram_read.fields.status.switch_left_2 = " << !bool(datagram_read.fields.status.switch_left_2) << "\n\n";
-
-  // datagram_write.uint32 = 0x1b000000;
-  // Serial << "datagram_write = " << _HEX(datagram_write.uint32) << "\n";
-  // datagram_read = writeRead(datagram_write);
-  // Serial << "datagram_read = " << _HEX(datagram_read.uint32) << "\n\n";
-  // Serial << "datagram_read.fields.data = " << _HEX(datagram_read.fields.data) << "\n\n";
-
-  // datagram_write.uint32 = 0x0;
-  // Serial << "datagram_write = " << _HEX(datagram_write.uint32) << "\n";
-  // datagram_read = writeRead(datagram_write);
-  // Serial << "datagram_read = " << _HEX(datagram_read.uint32) << "\n\n\n";
-  // Serial << "datagram_read.fields.data = " << _HEX(datagram_read.fields.data) << "\n\n";
-}
-
 uint32_t TMC429::getPositionTarget(size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -91,6 +34,15 @@ uint32_t TMC429::getPositionTarget(size_t motor)
   return readRegister(motor,ADDRESS_X_TARGET);
 }
 
+void TMC429::setPositionTarget(size_t motor, uint32_t position)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_X_TARGET,position);
+}
+
 uint32_t TMC429::getPositionActual(size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -98,6 +50,42 @@ uint32_t TMC429::getPositionActual(size_t motor)
     return 0;
   }
   return readRegister(motor,ADDRESS_X_ACTUAL);
+}
+
+uint16_t TMC429::getVelocityMin(size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return readRegister(motor,ADDRESS_V_MIN);
+}
+
+void TMC429::setVelocityMin(size_t motor, uint16_t velocity)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_V_MIN,velocity);
+}
+
+uint16_t TMC429::getVelocityMax(size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return readRegister(motor,ADDRESS_V_MAX);
+}
+
+void TMC429::setVelocityMax(size_t motor, uint16_t velocity)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_V_MAX,velocity);
 }
 
 TMC429::Status TMC429::getStatus()
@@ -120,6 +108,17 @@ uint32_t TMC429::readRegister(const uint8_t smda, const uint8_t address)
   datagram_write.fields.data = 0;
   MisoDatagram datagram_read = writeRead(datagram_write);
   return datagram_read.fields.data;
+}
+
+void TMC429::writeRegister(const uint8_t smda, const uint8_t address, const uint32_t data)
+{
+  MosiDatagram datagram_write;
+  datagram_write.fields.rrs = RRS_REGISTER;
+  datagram_write.fields.address = address;
+  datagram_write.fields.smda = smda;
+  datagram_write.fields.rw = RW_WRITE;
+  datagram_write.fields.data = data;
+  writeRead(datagram_write);
 }
 
 TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram datagram_write)
