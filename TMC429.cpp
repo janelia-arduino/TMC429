@@ -25,6 +25,16 @@ void TMC429::setup()
   SPI.begin();
 }
 
+uint32_t TMC429::getVersion()
+{
+  return readRegister(SMDA_COMMON,ADDRESS_TYPE_VERSION_429);
+}
+
+bool TMC429::checkVersion()
+{
+  return (getVersion() == VERSION);
+}
+
 uint32_t TMC429::getPositionTarget(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -252,11 +262,106 @@ bool TMC429::positionLatched(const size_t motor)
   return ref_conf_mode.fields.lp;
 }
 
-uint32_t TMC429::getTypeVersion()
+TMC429::InterfaceConfiguration TMC429::getInterfaceConfiguration()
 {
-  return readRegister(SMDA_COMMON,ADDRESS_TYPE_VERSION_429);
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  return if_conf.fields.if_conf;
 }
 
+void TMC429::setReferenceActiveLow()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setReferenceActiveHigh()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::enableInverseStepPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_stp = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableInverseStepPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_stp = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::enableInverseDirPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_dir = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableInverseDirPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_dir = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setStepDirOutput()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_sd = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setSpiOutput()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_sd = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setPositionCompareMotor(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.pos_comp_sel = motor;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::enableRightReferences()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableRightReferences()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+// private
 uint32_t TMC429::readRegister(const uint8_t smda, const uint8_t address)
 {
   MosiDatagram datagram_write;

@@ -20,8 +20,11 @@ void setup()
 
 void loop()
 {
-  uint32_t type_version = step_dir_controller.getTypeVersion();
-  Serial << "type_version: " << _HEX(type_version) << "\n";
+  uint32_t version = step_dir_controller.getVersion();
+  Serial << "version: " << _HEX(version) << "\n";
+
+  bool check_version = step_dir_controller.checkVersion();
+  Serial << "check_version: " << check_version << "\n";
 
   TMC429::Status status = step_dir_controller.getStatus();
   Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
@@ -97,6 +100,19 @@ void loop()
 
   bool position_latched = step_dir_controller.positionLatched(0);
   Serial << "position_latched: " << position_latched << "\n";
+
+  step_dir_controller.setPositionCompareMotor(2);
+  step_dir_controller.setStepDirOutput();
+  step_dir_controller.enableRightReferences();
+  TMC429::InterfaceConfiguration if_conf = step_dir_controller.getInterfaceConfiguration();
+  Serial << "if_conf.inv_ref: " << if_conf.inv_ref << "\n";
+  Serial << "if_conf.sdo_int: " << if_conf.sdo_int << "\n";
+  Serial << "if_conf.step_half: " << if_conf.step_half << "\n";
+  Serial << "if_conf.inv_stp: " << if_conf.inv_stp << "\n";
+  Serial << "if_conf.inv_dir: " << if_conf.inv_dir << "\n";
+  Serial << "if_conf.en_sd: " << if_conf.en_sd << "\n";
+  Serial << "if_conf.pos_comp_sel: " << if_conf.pos_comp_sel << "\n";
+  Serial << "if_conf.en_refr: " << if_conf.en_refr << "\n";
 
   delay(LOOP_DELAY);
 }
