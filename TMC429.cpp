@@ -25,7 +25,7 @@ void TMC429::setup()
   SPI.begin();
 }
 
-uint32_t TMC429::getPositionTarget(size_t motor)
+uint32_t TMC429::getPositionTarget(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -34,7 +34,7 @@ uint32_t TMC429::getPositionTarget(size_t motor)
   return readRegister(motor,ADDRESS_X_TARGET);
 }
 
-void TMC429::setPositionTarget(size_t motor, uint32_t position)
+void TMC429::setPositionTarget(const size_t motor, uint32_t position)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -43,7 +43,7 @@ void TMC429::setPositionTarget(size_t motor, uint32_t position)
   writeRegister(motor,ADDRESS_X_TARGET,position);
 }
 
-uint32_t TMC429::getPositionActual(size_t motor)
+uint32_t TMC429::getPositionActual(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -52,7 +52,16 @@ uint32_t TMC429::getPositionActual(size_t motor)
   return readRegister(motor,ADDRESS_X_ACTUAL);
 }
 
-uint16_t TMC429::getVelocityMin(size_t motor)
+void TMC429::setPositionActual(const size_t motor, uint32_t position)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_X_ACTUAL,position);
+}
+
+uint16_t TMC429::getVelocityMin(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -61,7 +70,7 @@ uint16_t TMC429::getVelocityMin(size_t motor)
   return readRegister(motor,ADDRESS_V_MIN);
 }
 
-void TMC429::setVelocityMin(size_t motor, uint16_t velocity)
+void TMC429::setVelocityMin(const size_t motor, const uint16_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -70,7 +79,7 @@ void TMC429::setVelocityMin(size_t motor, uint16_t velocity)
   writeRegister(motor,ADDRESS_V_MIN,velocity);
 }
 
-uint16_t TMC429::getVelocityMax(size_t motor)
+uint16_t TMC429::getVelocityMax(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -79,7 +88,7 @@ uint16_t TMC429::getVelocityMax(size_t motor)
   return readRegister(motor,ADDRESS_V_MAX);
 }
 
-void TMC429::setVelocityMax(size_t motor, uint16_t velocity)
+void TMC429::setVelocityMax(const size_t motor, const uint16_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -88,9 +97,159 @@ void TMC429::setVelocityMax(size_t motor, uint16_t velocity)
   writeRegister(motor,ADDRESS_V_MAX,velocity);
 }
 
+int16_t TMC429::getVelocityTarget(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  int16_t velocity = readRegister(motor,ADDRESS_V_TARGET);
+  if (velocity > (int32_t)(V_MASK >> 1))
+  {
+    velocity -= V_MASK;
+  }
+  return velocity;
+}
+
+void TMC429::setVelocityTarget(const size_t motor, const int16_t velocity)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  int16_t _velocity = velocity;
+  if (_velocity < 0)
+  {
+    _velocity += V_MASK;
+  }
+  writeRegister(motor,ADDRESS_V_TARGET,_velocity);
+}
+
+int16_t TMC429::getVelocityActual(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  int16_t velocity = readRegister(motor,ADDRESS_V_ACTUAL);
+  if (velocity > (int32_t)(V_MASK >> 1))
+  {
+    velocity -= V_MASK;
+  }
+  return velocity;
+}
+
 TMC429::Status TMC429::getStatus()
 {
   return status_;
+}
+
+TMC429::Mode TMC429::getMode(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  switch (ref_conf_mode.fields.mode)
+  {
+    case RAMP_MODE:
+      return RAMP_MODE;
+      break;
+    case SOFT_MODE:
+      return SOFT_MODE;
+      break;
+    case VELOCITY_MODE:
+      return VELOCITY_MODE;
+      break;
+    case HOLD_MODE:
+      return HOLD_MODE;
+      break;
+  }
+  return RAMP_MODE;
+}
+
+void TMC429::setMode(const size_t motor, const Mode mode)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.mode = (uint8_t)mode;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+TMC429::ReferenceConfiguration TMC429::getReferenceConfiguration(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  return ref_conf_mode.fields.ref_conf;
+}
+
+void TMC429::enableLeftSwitchStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.disable_stop_l = 0;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::disableLeftSwitchStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.disable_stop_l = 1;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::enableRightSwitchStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.disable_stop_r = 0;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::disableRightSwitchStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.disable_stop_r = 1;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::enableSoftStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.soft_stop = 1;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::disableSoftStop(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.soft_stop = 0;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::setReferenceSwitchToLeft(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.ref_rnl = 0;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+void TMC429::setReferenceSwitchToRight(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.ref_conf.ref_rnl = 1;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+bool TMC429::positionLatched(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  return ref_conf_mode.fields.lp;
 }
 
 uint32_t TMC429::getTypeVersion()
