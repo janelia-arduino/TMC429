@@ -28,10 +28,14 @@ public:
   bool checkVersion();
 
   void specifyClockFrequencyInMHz(uint8_t clock_frequency);
-  double getStepTimeInMicroSeconds();
+
+  void setStepDirOutput();
+  void setSpiOutput();
 
   uint32_t getVelocityMaxMaxInHz();
-  void setVelocityScaleUsingTotalMaxInHz(const uint32_t velocity);
+  void optimizeUsingTotalVelocityMaxInHz(const uint32_t velocity);
+
+  double getStepTimeInMicroSeconds();
 
   uint32_t getPositionTarget(const size_t motor);
   void setPositionTarget(const size_t motor, const uint32_t position);
@@ -124,9 +128,6 @@ public:
   void enableInverseDirPolarity();
   void disableInverseDirPolarity();
 
-  void setStepDirOutput();
-  void setSpiOutput();
-
   void setPositionCompareMotor(const size_t motor);
 
   void enableRightReferences();
@@ -165,14 +166,15 @@ private:
 
   const static uint32_t VERSION = 0x429101;
 
-  Status status_;
-  uint8_t clock_frequency_;
   const static uint8_t CLOCK_FREQUENCY_MAX = 32;
-  uint8_t pulse_div_;
   const static uint8_t PULSE_DIV_MAX = 13;
   const static uint32_t MHZ_PER_HZ = 1000000;
   const static uint32_t VELOCITY_CONSTANT = 65536;
   const static uint32_t VELOCITY_REGISTER_MAX = 2047;
+
+  Status status_;
+  uint8_t clock_frequency_;
+  uint8_t pulse_div_[MOTOR_COUNT];
 
   // MOSI Datagrams
   union MosiDatagram
@@ -314,7 +316,7 @@ private:
     struct Fields
     {
       ClockConfiguration clk_config;
-      uint8_t space0 : 8;
+      uint16_t space0 : 16;
     } fields;
     uint32_t uint32;
   };

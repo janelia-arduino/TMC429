@@ -7,7 +7,7 @@ const int BAUDRATE = 115200;
 const int LOOP_DELAY = 2000;
 const int CS_PIN = 10;
 const int CLOCK_FREQUENCY_MHZ = 32;
-const long MAX_VELOCITY = 2000;
+const long VELOCITY_MAX_TOTAL = 2000;
 
 // Instantiate TMC429
 TMC429 step_dir_controller = TMC429(CS_PIN);
@@ -30,13 +30,21 @@ void loop()
 
   step_dir_controller.specifyClockFrequencyInMHz(CLOCK_FREQUENCY_MHZ);
 
-  double step_time = step_dir_controller.getStepTimeInMicroSeconds();
-  Serial << "step_time: " << step_time << "\n";
+  step_dir_controller.setStepDirOutput();
 
   uint32_t velocity_max_max = step_dir_controller.getVelocityMaxMaxInHz();
   Serial << "velocity_max_max: " << velocity_max_max << "\n";
 
-  step_dir_controller.setVelocityScaleUsingTotalMaxInHz(MAX_VELOCITY);
+  step_dir_controller.optimizeUsingTotalVelocityMaxInHz(VELOCITY_MAX_TOTAL);
+  Serial << "VELOCITY_MAX_TOTAL: " << VELOCITY_MAX_TOTAL << "\n";
+
+  TMC429::ClockConfiguration clk_config = step_dir_controller.getClockConfiguration();
+  Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
+  Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
+  Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
+
+  double step_time = step_dir_controller.getStepTimeInMicroSeconds();
+  Serial << "step_time: " << step_time << "\n";
 
   TMC429::Status status = step_dir_controller.getStatus();
   Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
@@ -114,7 +122,6 @@ void loop()
   Serial << "position_latched: " << position_latched << "\n";
 
   step_dir_controller.setPositionCompareMotor(0);
-  step_dir_controller.setStepDirOutput();
   step_dir_controller.enableRightReferences();
   TMC429::InterfaceConfiguration if_conf = step_dir_controller.getInterfaceConfiguration();
   Serial << "if_conf.inv_ref: " << if_conf.inv_ref << "\n";
@@ -133,11 +140,6 @@ void loop()
   Serial << "switch_state.l1: " << switch_state.l1 << "\n";
   Serial << "switch_state.r2: " << switch_state.r2 << "\n";
   Serial << "switch_state.l2: " << switch_state.l2 << "\n";
-
-  TMC429::ClockConfiguration clk_config = step_dir_controller.getClockConfiguration();
-  Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
-  Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
-  Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
 
   Serial << "\n";
   delay(LOOP_DELAY);
