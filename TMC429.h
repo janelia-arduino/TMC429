@@ -27,22 +27,28 @@ public:
   uint32_t getVersion();
   bool checkVersion();
 
+  void specifyClockFrequencyInMHz(uint8_t clock_frequency);
+  double getStepTimeInMicroSeconds();
+
+  uint32_t getVelocityMaxMaxInHz();
+  void setVelocityScaleUsingTotalMaxInHz(const uint32_t velocity);
+
   uint32_t getPositionTarget(const size_t motor);
   void setPositionTarget(const size_t motor, const uint32_t position);
 
   uint32_t getPositionActual(const size_t motor);
   void setPositionActual(const size_t motor, const uint32_t position);
 
-  uint16_t getVelocityMin(const size_t motor);
-  void setVelocityMin(const size_t motor, const uint16_t velocity);
+  uint32_t getVelocityMinInHz(const size_t motor);
+  void setVelocityMinInHz(const size_t motor, const uint32_t velocity);
 
-  uint16_t getVelocityMax(const size_t motor);
-  void setVelocityMax(const size_t motor, const uint16_t velocity);
+  uint32_t getVelocityMaxInHz(const size_t motor);
+  void setVelocityMaxInHz(const size_t motor, const uint32_t velocity);
 
-  int16_t getVelocityTarget(const size_t motor);
-  void setVelocityTarget(const size_t motor, const int16_t velocity);
+  int32_t getVelocityTargetInHz(const size_t motor);
+  void setVelocityTargetInHz(const size_t motor, const int32_t velocity);
 
-  int16_t getVelocityActual(const size_t motor);
+  int32_t getVelocityActualInHz(const size_t motor);
 
   struct Status
   {
@@ -126,6 +132,29 @@ public:
   void enableRightReferences();
   void disableRightReferences();
 
+  struct SwitchState
+  {
+    uint8_t r0 : 1;
+    uint8_t l0 : 1;
+    uint8_t r1 : 1;
+    uint8_t l1 : 1;
+    uint8_t r2 : 1;
+    uint8_t l2 : 1;
+    uint8_t space : 2;
+  };
+
+  SwitchState getSwitchState();
+
+  struct ClockConfiguration
+  {
+    uint8_t usrs : 3;
+    uint8_t space0 : 5;
+    uint8_t ramp_div : 4;
+    uint8_t pulse_div : 4;
+  };
+
+  ClockConfiguration getClockConfiguration();
+
 private:
   // SPISettings
   const static uint32_t SPI_CLOCK = 1000000;
@@ -137,6 +166,13 @@ private:
   const static uint32_t VERSION = 0x429101;
 
   Status status_;
+  uint8_t clock_frequency_;
+  const static uint8_t CLOCK_FREQUENCY_MAX = 32;
+  uint8_t pulse_div_;
+  const static uint8_t PULSE_DIV_MAX = 13;
+  const static uint32_t MHZ_PER_HZ = 1000000;
+  const static uint32_t VELOCITY_CONSTANT = 65536;
+  const static uint32_t VELOCITY_REGISTER_MAX = 2047;
 
   // MOSI Datagrams
   union MosiDatagram
@@ -167,7 +203,7 @@ private:
   const static uint8_t ADDRESS_P_FACTOR = 0b1001;
   const static uint8_t ADDRESS_REF_CONF_MODE = 0b1010;
   const static uint8_t ADDRESS_INTERRUPT = 0b1011;
-  const static uint8_t ADDRESS_PULSE_DIV_RAMP_DIV = 0b1100;
+  const static uint8_t ADDRESS_CLOCK_CONFIGURATION = 0b1100;
   const static uint8_t ADDRESS_DX_REF_TOLERANCE = 0b1101;
   const static uint8_t ADDRESS_X_LATCHED = 0b1110;
   const static uint8_t ADDRESS_USTEP_COUNT_429 = 0b1111;
@@ -183,7 +219,7 @@ private:
   const static uint8_t ADDRESS_POWER_DOWN = 0b1000;
   const static uint8_t ADDRESS_TYPE_VERSION_429 = 0b1001;
   const static uint8_t ADDRESS_SWITCHES = 0b1110;
-  const static uint8_t ADDRESS_MISC = 0b1111;
+  const static uint8_t ADDRESS_GLOBAL_PARAMETERS = 0b1111;
 
   const static uint8_t SMDA_COMMON = 0b11;
 
@@ -240,7 +276,45 @@ private:
     struct Fields
     {
       InterfaceConfiguration if_conf;
-      uint16_t space1 : 16;
+      uint16_t space0 : 16;
+    } fields;
+    uint32_t uint32;
+  };
+  union SwState
+  {
+    struct Fields
+    {
+      SwitchState switch_state;
+      uint16_t space0 : 16;
+    } fields;
+    uint32_t uint32;
+  };
+  union GlobalParameters
+  {
+    struct Fields
+    {
+      uint8_t lsmd : 2;
+      uint8_t nscs_s : 1;
+      uint8_t sck_s : 1;
+      uint8_t ph_ab : 1;
+      uint8_t fd_ab : 1;
+      uint8_t dac_ab : 1;
+      uint8_t cs_com_ind : 1;
+      uint8_t clk2_div : 8;
+      uint8_t cont_update : 1;
+      uint8_t space0 : 3;
+      uint8_t ref_mux : 1;
+      uint8_t mot1r : 1;
+      uint8_t space1 : 2;
+    } fields;
+    uint32_t uint32;
+  };
+  union ClkConfig
+  {
+    struct Fields
+    {
+      ClockConfiguration clk_config;
+      uint8_t space0 : 8;
     } fields;
     uint32_t uint32;
   };
@@ -250,6 +324,22 @@ private:
   uint32_t readRegister(const uint8_t smda, const uint8_t address);
   void writeRegister(const uint8_t smda, const uint8_t address, const uint32_t data);
   MisoDatagram writeRead(const MosiDatagram datagram_write);
+
+  int32_t convertVelocityToHz(const int16_t velocity);
+  int16_t convertVelocityFromHz(const int32_t velocity);
+  void setOptimalPulseDiv(const uint32_t velocity_max);
+
+  uint16_t getVelocityMin(const size_t motor);
+  void setVelocityMin(const size_t motor, const uint16_t velocity);
+
+  uint16_t getVelocityMax(const size_t motor);
+  void setVelocityMax(const size_t motor, const uint16_t velocity);
+
+  int16_t getVelocityTarget(const size_t motor);
+  void setVelocityTarget(const size_t motor, const int16_t velocity);
+
+  int16_t getVelocityActual(const size_t motor);
+
 };
 
 #endif

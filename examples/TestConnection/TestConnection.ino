@@ -6,6 +6,8 @@
 const int BAUDRATE = 115200;
 const int LOOP_DELAY = 2000;
 const int CS_PIN = 10;
+const int CLOCK_FREQUENCY_MHZ = 32;
+const long MAX_VELOCITY = 2000;
 
 // Instantiate TMC429
 TMC429 step_dir_controller = TMC429(CS_PIN);
@@ -26,26 +28,36 @@ void loop()
   bool check_version = step_dir_controller.checkVersion();
   Serial << "check_version: " << check_version << "\n";
 
+  step_dir_controller.specifyClockFrequencyInMHz(CLOCK_FREQUENCY_MHZ);
+
+  double step_time = step_dir_controller.getStepTimeInMicroSeconds();
+  Serial << "step_time: " << step_time << "\n";
+
+  uint32_t velocity_max_max = step_dir_controller.getVelocityMaxMaxInHz();
+  Serial << "velocity_max_max: " << velocity_max_max << "\n";
+
+  step_dir_controller.setVelocityScaleUsingTotalMaxInHz(MAX_VELOCITY);
+
   TMC429::Status status = step_dir_controller.getStatus();
   Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
   Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
   Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
   Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
   Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
-  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n\n";
+  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
 
-  uint16_t velocity_min = 100;
-  step_dir_controller.setVelocityMin(0,velocity_min);
+  uint32_t velocity_min = 100;
+  step_dir_controller.setVelocityMinInHz(0,velocity_min);
   Serial << "set velocity_min: " << velocity_min << "\n";
 
-  velocity_min = step_dir_controller.getVelocityMin(0);
+  velocity_min = step_dir_controller.getVelocityMinInHz(0);
   Serial << "velocity_min: " << velocity_min << "\n";
 
-  uint16_t velocity_max = 2000;
-  step_dir_controller.setVelocityMax(0,velocity_max);
+  uint32_t velocity_max = 2000;
+  step_dir_controller.setVelocityMaxInHz(0,velocity_max);
   Serial << "set velocity_max: " << velocity_max << "\n";
 
-  velocity_max = step_dir_controller.getVelocityMax(0);
+  velocity_max = step_dir_controller.getVelocityMaxInHz(0);
   Serial << "velocity_max: " << velocity_max << "\n";
 
   step_dir_controller.setMode(0,TMC429::VELOCITY_MODE);
@@ -69,13 +81,13 @@ void loop()
   }
 
   int16_t velocity_target = -321;
-  step_dir_controller.setVelocityTarget(0,velocity_target);
+  step_dir_controller.setVelocityTargetInHz(0,velocity_target);
   Serial << "set velocity_target: " << velocity_target << "\n";
 
-  velocity_target = step_dir_controller.getVelocityTarget(0);
+  velocity_target = step_dir_controller.getVelocityTargetInHz(0);
   Serial << "velocity_target: " << velocity_target << "\n";
 
-  int16_t velocity_actual = step_dir_controller.getVelocityActual(0);
+  int16_t velocity_actual = step_dir_controller.getVelocityActualInHz(0);
   Serial << "velocity_actual: " << velocity_actual << "\n";
 
   uint32_t position_target = 12345;
@@ -101,7 +113,7 @@ void loop()
   bool position_latched = step_dir_controller.positionLatched(0);
   Serial << "position_latched: " << position_latched << "\n";
 
-  step_dir_controller.setPositionCompareMotor(2);
+  step_dir_controller.setPositionCompareMotor(0);
   step_dir_controller.setStepDirOutput();
   step_dir_controller.enableRightReferences();
   TMC429::InterfaceConfiguration if_conf = step_dir_controller.getInterfaceConfiguration();
@@ -114,5 +126,19 @@ void loop()
   Serial << "if_conf.pos_comp_sel: " << if_conf.pos_comp_sel << "\n";
   Serial << "if_conf.en_refr: " << if_conf.en_refr << "\n";
 
+  TMC429::SwitchState switch_state = step_dir_controller.getSwitchState();
+  Serial << "switch_state.r0: " << switch_state.r0 << "\n";
+  Serial << "switch_state.l0: " << switch_state.l0 << "\n";
+  Serial << "switch_state.r1: " << switch_state.r1 << "\n";
+  Serial << "switch_state.l1: " << switch_state.l1 << "\n";
+  Serial << "switch_state.r2: " << switch_state.r2 << "\n";
+  Serial << "switch_state.l2: " << switch_state.l2 << "\n";
+
+  TMC429::ClockConfiguration clk_config = step_dir_controller.getClockConfiguration();
+  Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
+  Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
+  Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
+
+  Serial << "\n";
   delay(LOOP_DELAY);
 }
