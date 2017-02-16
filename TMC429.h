@@ -61,13 +61,13 @@ public:
 
   int32_t getVelocityActualInHz(const size_t motor);
 
-  uint32_t getPositionTarget(const size_t motor);
+  int32_t getPositionTarget(const size_t motor);
   void setPositionTarget(const size_t motor,
-                         const uint32_t position);
+                         const int32_t position);
 
-  uint32_t getPositionActual(const size_t motor);
+  int32_t getPositionActual(const size_t motor);
   void setPositionActual(const size_t motor,
-                         const uint32_t position);
+                         const int32_t position);
 
   struct Status
   {
@@ -258,7 +258,12 @@ private:
   const static uint32_t A_MASK = 0xfff;
   const static uint8_t STEP_DIV_MASK = 0xf;
 
-  // union structs
+  // Bit Count
+  const static uint8_t X_BIT_COUNT = 24;
+  const static uint8_t V_BIT_COUNT = 12;
+  const static uint8_t A_BIT_COUNT = 12;
+
+  // Union Structs
   union PFactor
   {
     struct Fields
@@ -341,6 +346,8 @@ private:
                      const uint8_t address,
                      const uint32_t data);
   MisoDatagram writeRead(const MosiDatagram datagram_write);
+
+  int32_t unsignedToSigned(uint32_t input_value, uint8_t num_bits);
 
   void specifyClockFrequencyInMHz(const uint8_t clock_frequency);
 

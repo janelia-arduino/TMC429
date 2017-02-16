@@ -191,17 +191,18 @@ int32_t TMC429::getVelocityActualInHz(const size_t motor)
   return convertVelocityToHz(motor,getVelocityActual(motor));
 }
 
-uint32_t TMC429::getPositionTarget(const size_t motor)
+int32_t TMC429::getPositionTarget(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
     return 0;
   }
-  return readRegister(motor,ADDRESS_X_TARGET);
+  uint32_t position_unsigned = readRegister(motor,ADDRESS_X_TARGET);
+  return unsignedToSigned(position_unsigned,X_BIT_COUNT);
 }
 
 void TMC429::setPositionTarget(const size_t motor,
-                               uint32_t position)
+                               int32_t position)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -210,17 +211,18 @@ void TMC429::setPositionTarget(const size_t motor,
   writeRegister(motor,ADDRESS_X_TARGET,position);
 }
 
-uint32_t TMC429::getPositionActual(const size_t motor)
+int32_t TMC429::getPositionActual(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
     return 0;
   }
-  return readRegister(motor,ADDRESS_X_ACTUAL);
+  uint32_t position_unsigned = readRegister(motor,ADDRESS_X_ACTUAL);
+  return unsignedToSigned(position_unsigned,X_BIT_COUNT);
 }
 
 void TMC429::setPositionActual(const size_t motor,
-                               uint32_t position)
+                               int32_t position)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -503,6 +505,12 @@ TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram datagram_write)
   return datagram_read;
 }
 
+int32_t TMC429::unsignedToSigned(uint32_t input_value, uint8_t num_bits)
+{
+  uint32_t mask = 1 << (num_bits - 1);
+  return -(input_value & mask) + (input_value & ~mask);
+}
+
 void TMC429::specifyClockFrequencyInMHz(const uint8_t clock_frequency)
 {
   if (clock_frequency <= CLOCK_FREQUENCY_MAX)
@@ -614,33 +622,20 @@ void TMC429::setVelocityMax(const size_t motor,
 
 int16_t TMC429::getVelocityTarget(const size_t motor)
 {
-  int16_t velocity = readRegister(motor,ADDRESS_V_TARGET);
-  if (velocity > (int16_t)(V_MASK >> 1))
-  {
-    velocity -= V_MASK;
-  }
-  return velocity;
+  uint32_t velocity_unsigned = readRegister(motor,ADDRESS_V_TARGET);
+  return unsignedToSigned(velocity_unsigned,V_BIT_COUNT);
 }
 
 void TMC429::setVelocityTarget(const size_t motor,
                                const int16_t velocity)
 {
-  int16_t _velocity = velocity;
-  if (_velocity < 0)
-  {
-    _velocity += V_MASK;
-  }
-  writeRegister(motor,ADDRESS_V_TARGET,_velocity);
+  writeRegister(motor,ADDRESS_V_TARGET,velocity);
 }
 
 int16_t TMC429::getVelocityActual(const size_t motor)
 {
-  int16_t velocity = readRegister(motor,ADDRESS_V_ACTUAL);
-  if (velocity > (int16_t)(V_MASK >> 1))
-  {
-    velocity -= V_MASK;
-  }
-  return velocity;
+  uint32_t velocity_unsigned = readRegister(motor,ADDRESS_V_ACTUAL);
+  return unsignedToSigned(velocity_unsigned,V_BIT_COUNT);
 }
 
 int32_t TMC429::convertAccelerationToHzPerS(const size_t motor,
@@ -697,11 +692,7 @@ void TMC429::setAccelerationMax(const size_t motor,
 
 int16_t TMC429::getAccelerationActual(const size_t motor)
 {
-  int16_t acceleration = readRegister(motor,ADDRESS_A_ACTUAL);
-  if (acceleration > (int16_t)(A_MASK >> 1))
-  {
-    acceleration -= A_MASK;
-  }
-  return acceleration;
+  uint32_t acceleration_unsigned = readRegister(motor,ADDRESS_A_ACTUAL);
+  return unsignedToSigned(acceleration_unsigned,A_BIT_COUNT);
 }
 

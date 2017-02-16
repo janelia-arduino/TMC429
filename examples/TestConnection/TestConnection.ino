@@ -31,7 +31,8 @@ void setup()
 
 void loop()
 {
-  step_dir_controller.setMode(MOTOR,TMC429::VELOCITY_MODE);
+  // step_dir_controller.setMode(MOTOR,TMC429::VELOCITY_MODE);
+  step_dir_controller.setMode(MOTOR,TMC429::RAMP_MODE);
 
   TMC429::Mode mode = step_dir_controller.getMode(MOTOR);
   if (mode == TMC429::RAMP_MODE)
@@ -72,7 +73,7 @@ void loop()
   velocity_max = step_dir_controller.getVelocityMaxInHz(MOTOR);
   Serial << "velocity_max: " << velocity_max << "\n";
 
-  int16_t velocity_target = -321;
+  int16_t velocity_target = 321;
   step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
   Serial << "set velocity_target: " << velocity_target << "\n";
 
@@ -82,14 +83,14 @@ void loop()
   int16_t velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
   Serial << "velocity_actual: " << velocity_actual << "\n";
 
-  uint32_t position_target = 12345;
+  int32_t position_target = -12345;
   step_dir_controller.setPositionTarget(MOTOR,position_target);
   Serial << "set position_target: " << position_target << "\n";
 
   position_target = step_dir_controller.getPositionTarget(MOTOR);
   Serial << "position_target: " << position_target << "\n";
 
-  uint32_t position_actual = step_dir_controller.getPositionActual(MOTOR);
+  int32_t position_actual = step_dir_controller.getPositionActual(MOTOR);
   Serial << "position_actual: " << position_actual << "\n";
 
   TMC429::Status status = step_dir_controller.getStatus();
