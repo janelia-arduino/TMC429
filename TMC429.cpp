@@ -124,7 +124,9 @@ void TMC429::setLimitsInHz(const size_t motor,
 
   setOptimalRampDiv(motor,acceleration_max);
 
-  setAccelerationMax(motor,convertAccelerationFromHzPerS(motor,acceleration_max));
+  uint16_t a_max = setAccelerationMax(motor,convertAccelerationFromHzPerS(motor,acceleration_max));
+
+  setOptimalPropFactor(motor,a_max);
 }
 
 uint32_t TMC429::getAccelerationMaxInHzPerS(const size_t motor)
@@ -523,7 +525,7 @@ void TMC429::specifyClockFrequencyInMHz(const uint8_t clock_frequency)
   }
 }
 
-void TMC429::setOptimalStepDiv(const uint32_t velocity_max)
+void TMC429::setOptimalStepDiv(const uint32_t velocity_max_hz)
 {
   int step_div = getStepDiv();
 
@@ -531,7 +533,7 @@ void TMC429::setOptimalStepDiv(const uint32_t velocity_max)
 
   uint32_t v_max = (double)MHZ_PER_HZ/(step_time*2);
 
-  while ((v_max < velocity_max) && (step_div >= 1))
+  while ((v_max < velocity_max_hz) && (step_div >= 1))
   {
     --step_div;
     step_time = stepDivToStepTime(step_div);
@@ -581,12 +583,12 @@ int16_t TMC429::convertVelocityFromHz(const size_t motor,
 }
 
 void TMC429::setOptimalPulseDiv(const size_t motor,
-                                const uint32_t velocity_max)
+                                const uint32_t velocity_max_hz)
 {
   int8_t pulse_div = PULSE_DIV_MAX + 1;
   uint32_t v_max = 0;
 
-  while ((v_max < velocity_max) && (pulse_div >= 1))
+  while ((v_max < velocity_max_hz) && (pulse_div >= 1))
   {
     --pulse_div;
     pulse_div_[motor] = pulse_div;
@@ -662,12 +664,14 @@ int16_t TMC429::convertAccelerationFromHzPerS(const size_t motor,
 }
 
 void TMC429::setOptimalRampDiv(const size_t motor,
-                               const uint32_t acceleration_max)
+                               const uint32_t acceleration_max_hz_per_s)
 {
   int8_t ramp_div = RAMP_DIV_MAX + 1;
   uint32_t a_max = 0;
 
-  while ((a_max < acceleration_max) && (ramp_div >= 1))
+  while ((a_max < acceleration_max_hz_per_s) &&
+         (ramp_div >= 1) &&
+         (ramp_div >= pulse_div_[motor]))
   {
     --ramp_div;
     ramp_div_[motor] = ramp_div;
@@ -687,6 +691,9 @@ uint16_t TMC429::getAccelerationMax(const size_t motor)
 void TMC429::setAccelerationMax(const size_t motor,
                                 const uint16_t acceleration)
 {
+  uint32_t a_max_min = (1 << (ramp_div_[motor] - pulse_div_[motor] - 1));
+  uint32_t a_max_max = (1 << (ramp_div_[motor] - pulse_div_[motor] + 12));
+  if 
   writeRegister(motor,ADDRESS_A_MAX,acceleration);
 }
 
@@ -694,5 +701,56 @@ int16_t TMC429::getAccelerationActual(const size_t motor)
 {
   uint32_t acceleration_unsigned = readRegister(motor,ADDRESS_A_ACTUAL);
   return unsignedToSigned(acceleration_unsigned,A_BIT_COUNT);
+}
+
+void TMC429::setOptimalPropFactor(const size_t motor,
+                                  const uint16_t acceleration_max)
+{
+  // int pdiv, pmul, pm, pd ;
+  // double p_ideal, p_best, p, p_reduced;
+
+  // pm=-1; pd=-1; // -1 indicates : no valid pair found
+
+  // p_ideal = a_max / (pow(2, ramp_div-pulse_div)*128.0);
+  // p = a_max / ( 128.0 * pow(2, ramp_div-pulse_div) );
+  // p_reduced = p * ( 1.0 – p_reduction );
+  // for (pdiv=0; pdiv<=13; pdiv++)
+  // {
+  //   pmul = (int)(p_reduced * 8.0 * pow(2, pdiv)) – 128;
+  //   if ( (0 <= pmul) && (pmul <= 127) )
+  //   {
+  //     pm = pmul + 128;
+  //     pd = pdiv;
+  //   }
+  //   *p_mul = pm;
+  //   *p_div = pd;
+  //   p_best = ((double)(pm)) / ((double)pow(2,pd+3));
+  // }
+  // *PIdeal = p_ideal;
+  // *PBest = p_best;
+  // *PRedu = p_reduced;
+
+  int pdiv, pmul, pm, pd ;
+  double p_ideal, p_best, p_reduced;
+
+  pm=-1; pd=-1; // -1 indicates : no valid pair found
+  p_ideal = acceleration_max/(128.0*(1 << (ramp_div_[motor] - pulse_div_[motor])));
+  p_reduced = p_ideal*0.99;
+  for (pdiv=0; pdiv<=13; ++pdiv)
+  {
+    pmul = (int)(p_reduced*8.0*(1 << pdiv)) - 128;
+    if ((0 <= pmul) && (pmul <= 127))
+    {
+      pm = pmul + 128;
+      pd = pdiv;
+    }
+    p_best = ((double)(pm)) / ((double)(1 << (pd + 3)));
+  }
+  Serial << "acceleration_max: " << acceleration_max << "\n";
+  Serial << "p_ideal: " << p_ideal << "\n";
+  Serial << "p_best: " << p_best << "\n";
+  Serial << "p_reduced: " << p_reduced << "\n";
+  Serial << "p_mul: " << pm << "\n";
+  Serial << "p_div: " << pd << "\n";
 }
 

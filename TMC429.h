@@ -251,11 +251,11 @@ private:
   };
 
   // Masks
-  const static uint32_t X_MASK = 0xffffff;
-  const static uint32_t V_MIN_MAX_MASK = 0x7ff;
-  const static uint32_t V_MASK = 0xfff;
-  const static uint32_t A_MAX_MASK = 0x7ff;
-  const static uint32_t A_MASK = 0xfff;
+  // const static uint32_t X_MASK = 0xffffff;
+  // const static uint32_t V_MIN_MAX_MASK = 0x7ff;
+  // const static uint32_t V_MASK = 0xfff;
+  // const static uint32_t A_MAX_MASK = 0x7ff;
+  // const static uint32_t A_MASK = 0xfff;
   const static uint8_t STEP_DIV_MASK = 0xf;
 
   // Bit Count
@@ -264,7 +264,7 @@ private:
   const static uint8_t A_BIT_COUNT = 12;
 
   // Union Structs
-  union PFactor
+  union PropFactor
   {
     struct Fields
     {
@@ -351,7 +351,7 @@ private:
 
   void specifyClockFrequencyInMHz(const uint8_t clock_frequency);
 
-  void setOptimalStepDiv(const uint32_t velocity_max);
+  void setOptimalStepDiv(const uint32_t velocity_max_hz);
   uint8_t getStepDiv();
   void setStepDiv(const uint8_t step_div);
   double stepDivToStepTime(const uint8_t step_div);
@@ -362,7 +362,7 @@ private:
                                 const int32_t velocity);
 
   void setOptimalPulseDiv(const size_t motor,
-                          const uint32_t velocity_max);
+                          const uint32_t velocity_max_hz);
 
   uint16_t getVelocityMin(const size_t motor);
   void setVelocityMin(const size_t motor,
@@ -384,13 +384,16 @@ private:
                                         const int32_t acceleration);
 
   void setOptimalRampDiv(const size_t motor,
-                         const uint32_t acceleration_max);
+                         const uint32_t acceleration_max_hz_per_s);
 
   uint16_t getAccelerationMax(const size_t motor);
-  void setAccelerationMax(const size_t motor,
-                          const uint16_t acceleration);
+  uint16_t setAccelerationMax(const size_t motor,
+                              const uint16_t acceleration);
 
   int16_t getAccelerationActual(const size_t motor);
+
+  void setOptimalPropFactor(const size_t motor,
+                            const uint16_t acceleration_max);
 
 };
 
