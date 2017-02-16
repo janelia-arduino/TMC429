@@ -20,39 +20,48 @@
 class TMC429
 {
 public:
-  TMC429(const size_t cs_pin);
-
-  void setup();
+  void setup(const size_t cs_pin,
+             const uint8_t clock_frequency);
 
   uint32_t getVersion();
   bool checkVersion();
 
-  void specifyClockFrequencyInMHz(uint8_t clock_frequency);
-
   void setStepDirOutput();
   void setSpiOutput();
 
+  enum Mode
+    {
+      RAMP_MODE=0b00,
+      SOFT_MODE=0b01,
+      VELOCITY_MODE=0b10,
+      HOLD_MODE=0b11,
+    };
+
+  Mode getMode(const size_t motor);
+  void setMode(const size_t motor,
+               const Mode mode);
+
   uint32_t getVelocityMaxMaxInHz();
-  void optimizeUsingTotalVelocityMaxInHz(const uint32_t velocity);
 
-  double getStepTimeInMicroSeconds();
-
-  uint32_t getPositionTarget(const size_t motor);
-  void setPositionTarget(const size_t motor, const uint32_t position);
-
-  uint32_t getPositionActual(const size_t motor);
-  void setPositionActual(const size_t motor, const uint32_t position);
-
+  void setVelocityMinMaxInHz(const size_t motor,
+                             const uint32_t velocity_min,
+                             const uint32_t velocity_max);
   uint32_t getVelocityMinInHz(const size_t motor);
-  void setVelocityMinInHz(const size_t motor, const uint32_t velocity);
-
   uint32_t getVelocityMaxInHz(const size_t motor);
-  void setVelocityMaxInHz(const size_t motor, const uint32_t velocity);
 
   int32_t getVelocityTargetInHz(const size_t motor);
-  void setVelocityTargetInHz(const size_t motor, const int32_t velocity);
+  void setVelocityTargetInHz(const size_t motor,
+                             const int32_t velocity);
 
   int32_t getVelocityActualInHz(const size_t motor);
+
+  uint32_t getPositionTarget(const size_t motor);
+  void setPositionTarget(const size_t motor,
+                         const uint32_t position);
+
+  uint32_t getPositionActual(const size_t motor);
+  void setPositionActual(const size_t motor,
+                         const uint32_t position);
 
   struct Status
   {
@@ -67,17 +76,6 @@ public:
   };
 
   Status getStatus();
-
-  enum Mode
-    {
-      RAMP_MODE=0b00,
-      SOFT_MODE=0b01,
-      VELOCITY_MODE=0b10,
-      HOLD_MODE=0b11,
-    };
-
-  Mode getMode(const size_t motor);
-  void setMode(const size_t motor, const Mode mode);
 
   struct ReferenceConfiguration
   {
@@ -154,7 +152,9 @@ public:
     uint8_t pulse_div : 4;
   };
 
-  ClockConfiguration getClockConfiguration();
+  ClockConfiguration getClockConfiguration(const size_t motor);
+  double getStepTimeInMicroSeconds();
+
 
 private:
   // SPISettings
@@ -323,22 +323,33 @@ private:
 
   size_t cs_pin_;
 
-  uint32_t readRegister(const uint8_t smda, const uint8_t address);
-  void writeRegister(const uint8_t smda, const uint8_t address, const uint32_t data);
+  uint32_t readRegister(const uint8_t smda,
+                        const uint8_t address);
+  void writeRegister(const uint8_t smda,
+                     const uint8_t address,
+                     const uint32_t data);
   MisoDatagram writeRead(const MosiDatagram datagram_write);
 
-  int32_t convertVelocityToHz(const int16_t velocity);
-  int16_t convertVelocityFromHz(const int32_t velocity);
-  void setOptimalPulseDiv(const uint32_t velocity_max);
+  void specifyClockFrequencyInMHz(const uint8_t clock_frequency);
+
+  int32_t convertVelocityToHz(const size_t motor,
+                              const int16_t velocity);
+  int16_t convertVelocityFromHz(const size_t motor,
+                                const int32_t velocity);
+  void setOptimalPulseDiv(const size_t motor,
+                          const uint32_t velocity_max);
 
   uint16_t getVelocityMin(const size_t motor);
-  void setVelocityMin(const size_t motor, const uint16_t velocity);
+  void setVelocityMin(const size_t motor,
+                      const uint16_t velocity);
 
   uint16_t getVelocityMax(const size_t motor);
-  void setVelocityMax(const size_t motor, const uint16_t velocity);
+  void setVelocityMax(const size_t motor,
+                      const uint16_t velocity);
 
   int16_t getVelocityTarget(const size_t motor);
-  void setVelocityTarget(const size_t motor, const int16_t velocity);
+  void setVelocityTarget(const size_t motor,
+                         const int16_t velocity);
 
   int16_t getVelocityActual(const size_t motor);
 

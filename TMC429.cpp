@@ -8,23 +8,21 @@
 #include "TMC429.h"
 
 
-// TMC429::TMC429()
-// {
-//   // initialized_ = false;
-// }
-
-TMC429::TMC429(const size_t cs_pin) :
-  cs_pin_(cs_pin)
+void TMC429::setup(const size_t cs_pin,
+                   const uint8_t clock_frequency)
 {
+  cs_pin_ = cs_pin;
+
   pinMode(cs_pin_,OUTPUT);
   digitalWrite(cs_pin_,HIGH);
 
-  specifyClockFrequencyInMHz(CLOCK_FREQUENCY_MAX);
-  pulse_div_ = 0;
-}
+  specifyClockFrequencyInMHz(clock_frequency);
 
-void TMC429::setup()
-{
+  for (uint8_t motor=0; motor<MOTOR_COUNT; ++motor)
+  {
+    pulse_div_[motor] = 0;
+  }
+
   SPI.begin();
 }
 
@@ -36,14 +34,6 @@ uint32_t TMC429::getVersion()
 bool TMC429::checkVersion()
 {
   return (getVersion() == VERSION);
-}
-
-void TMC429::specifyClockFrequencyInMHz(uint8_t clock_frequency)
-{
-  if (clock_frequency <= CLOCK_FREQUENCY_MAX)
-  {
-    clock_frequency_ = clock_frequency;
-  }
 }
 
 void TMC429::setStepDirOutput()
@@ -60,133 +50,6 @@ void TMC429::setSpiOutput()
   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
   if_conf.fields.if_conf.en_sd = 0;
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-uint32_t TMC429::getVelocityMaxMaxInHz()
-{
-  // (clock_frequency_*MHZ_PER_HZ*VELOCITY_REGISTER_MAX)/(VELOCITY_CONSTANT);
-  double x = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)VELOCITY_CONSTANT;
-  double y = x*(double)VELOCITY_REGISTER_MAX;
-  return y;
-}
-
-void TMC429::optimizeUsingTotalVelocityMaxInHz(const uint32_t velocity)
-{
-  setOptimalPulseDiv(velocity);
-}
-
-double TMC429::getStepTimeInMicroSeconds()
-{
-  GlobalParameters global_parameters;
-  global_parameters.uint32 = readRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS);
-  uint8_t stpdiv_429 = global_parameters.fields.clk2_div;
-  Serial << "stpdiv_429: " << stpdiv_429 << "\n";
-  double step_time = 16*(1 + stpdiv_429)/clock_frequency_;
-  return step_time;
-}
-
-uint32_t TMC429::getPositionTarget(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return readRegister(motor,ADDRESS_X_TARGET);
-}
-
-void TMC429::setPositionTarget(const size_t motor, uint32_t position)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
-  writeRegister(motor,ADDRESS_X_TARGET,position);
-}
-
-uint32_t TMC429::getPositionActual(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return readRegister(motor,ADDRESS_X_ACTUAL);
-}
-
-void TMC429::setPositionActual(const size_t motor, uint32_t position)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
-  writeRegister(motor,ADDRESS_X_ACTUAL,position);
-}
-
-uint32_t TMC429::getVelocityMinInHz(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return convertVelocityToHz(getVelocityMin(motor));
-}
-
-void TMC429::setVelocityMinInHz(const size_t motor, const uint32_t velocity)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
-  setVelocityMin(motor,convertVelocityFromHz(velocity));
-}
-
-uint32_t TMC429::getVelocityMaxInHz(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return convertVelocityToHz(getVelocityMax(motor));
-}
-
-void TMC429::setVelocityMaxInHz(const size_t motor, const uint32_t velocity)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
-  setVelocityMax(motor,convertVelocityFromHz(velocity));
-}
-
-int32_t TMC429::getVelocityTargetInHz(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return convertVelocityToHz(getVelocityTarget(motor));
-}
-
-void TMC429::setVelocityTargetInHz(const size_t motor, const int32_t velocity)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
-  setVelocityTarget(motor,convertVelocityFromHz(velocity));
-}
-
-int32_t TMC429::getVelocityActualInHz(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0;
-  }
-  return convertVelocityToHz(getVelocityActual(motor));
-}
-
-TMC429::Status TMC429::getStatus()
-{
-  return status_;
 }
 
 TMC429::Mode TMC429::getMode(const size_t motor)
@@ -211,12 +74,126 @@ TMC429::Mode TMC429::getMode(const size_t motor)
   return RAMP_MODE;
 }
 
-void TMC429::setMode(const size_t motor, const Mode mode)
+void TMC429::setMode(const size_t motor,
+                     const Mode mode)
 {
   RefConfMode ref_conf_mode;
   ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
   ref_conf_mode.fields.mode = (uint8_t)mode;
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+uint32_t TMC429::getVelocityMaxMaxInHz()
+{
+  // (clock_frequency_*MHZ_PER_HZ*VELOCITY_REGISTER_MAX)/(VELOCITY_CONSTANT);
+  double x = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)VELOCITY_CONSTANT;
+  double y = x*(double)VELOCITY_REGISTER_MAX;
+  return y;
+}
+
+void TMC429::setVelocityMinMaxInHz(const size_t motor,
+                                   const uint32_t velocity_min,
+                                   const uint32_t velocity_max)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+
+  setOptimalPulseDiv(motor,velocity_max);
+
+  setVelocityMin(motor,convertVelocityFromHz(motor,velocity_min));
+
+  setVelocityMax(motor,convertVelocityFromHz(motor,velocity_max));
+}
+
+uint32_t TMC429::getVelocityMinInHz(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return convertVelocityToHz(motor,getVelocityMin(motor));
+}
+
+uint32_t TMC429::getVelocityMaxInHz(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return convertVelocityToHz(motor,getVelocityMax(motor));
+}
+
+int32_t TMC429::getVelocityTargetInHz(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return convertVelocityToHz(motor,getVelocityTarget(motor));
+}
+
+void TMC429::setVelocityTargetInHz(const size_t motor,
+                                   const int32_t velocity)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  setVelocityTarget(motor,convertVelocityFromHz(motor,velocity));
+}
+
+int32_t TMC429::getVelocityActualInHz(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return convertVelocityToHz(motor,getVelocityActual(motor));
+}
+
+uint32_t TMC429::getPositionTarget(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return readRegister(motor,ADDRESS_X_TARGET);
+}
+
+void TMC429::setPositionTarget(const size_t motor,
+                               uint32_t position)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_X_TARGET,position);
+}
+
+uint32_t TMC429::getPositionActual(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  return readRegister(motor,ADDRESS_X_ACTUAL);
+}
+
+void TMC429::setPositionActual(const size_t motor,
+                               uint32_t position)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_X_ACTUAL,position);
+}
+
+TMC429::Status TMC429::getStatus()
+{
+  return status_;
 }
 
 TMC429::ReferenceConfiguration TMC429::getReferenceConfiguration(const size_t motor)
@@ -387,15 +364,26 @@ TMC429::SwitchState TMC429::getSwitchState()
   return switch_state.fields.switch_state;
 }
 
-TMC429::ClockConfiguration TMC429::getClockConfiguration()
+TMC429::ClockConfiguration TMC429::getClockConfiguration(const size_t motor)
 {
   ClkConfig clk_config;
-  clk_config.uint32 = readRegister(SMDA_COMMON,ADDRESS_CLOCK_CONFIGURATION);
+  clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
   return clk_config.fields.clk_config;
 }
 
+double TMC429::getStepTimeInMicroSeconds()
+{
+  GlobalParameters global_parameters;
+  global_parameters.uint32 = readRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS);
+  uint8_t stpdiv_429 = global_parameters.fields.clk2_div;
+  Serial << "stpdiv_429: " << stpdiv_429 << "\n";
+  double step_time = 16*(1 + stpdiv_429)/clock_frequency_;
+  return step_time;
+}
+
 // private
-uint32_t TMC429::readRegister(const uint8_t smda, const uint8_t address)
+uint32_t TMC429::readRegister(const uint8_t smda,
+                              const uint8_t address)
 {
   MosiDatagram datagram_write;
   datagram_write.fields.rrs = RRS_REGISTER;
@@ -407,7 +395,9 @@ uint32_t TMC429::readRegister(const uint8_t smda, const uint8_t address)
   return datagram_read.fields.data;
 }
 
-void TMC429::writeRegister(const uint8_t smda, const uint8_t address, const uint32_t data)
+void TMC429::writeRegister(const uint8_t smda,
+                           const uint8_t address,
+                           const uint32_t data)
 {
   MosiDatagram datagram_write;
   datagram_write.fields.rrs = RRS_REGISTER;
@@ -438,23 +428,38 @@ TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram datagram_write)
   return datagram_read;
 }
 
-int32_t TMC429::convertVelocityToHz(const int16_t velocity)
+void TMC429::specifyClockFrequencyInMHz(const uint8_t clock_frequency)
 {
-  // (clock_frequency_*MHZ_PER_HZ*velocity)/((1 << pulse_div_)*VELOCITY_CONSTANT);
+  if (clock_frequency <= CLOCK_FREQUENCY_MAX)
+  {
+    clock_frequency_ = clock_frequency;
+  }
+  else
+  {
+    clock_frequency_ = CLOCK_FREQUENCY_MAX;
+  }
+}
+
+int32_t TMC429::convertVelocityToHz(const size_t motor,
+                                    const int16_t velocity)
+{
+  // (clock_frequency_*MHZ_PER_HZ*velocity)/((1 << pulse_div_[motor])*VELOCITY_CONSTANT);
   double x = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)VELOCITY_CONSTANT;
-  double y = (x*(double)velocity)/((double)(1 << pulse_div_));
+  double y = (x*(double)velocity)/((double)(1 << pulse_div_[motor]));
   return y;
 }
 
-int16_t TMC429::convertVelocityFromHz(const int32_t velocity)
+int16_t TMC429::convertVelocityFromHz(const size_t motor,
+                                      const int32_t velocity)
 {
-  // (velocity*(1 << pulse_div_)*VELOCITY_CONSTANT)/(clock_frequency_*MHZ_PER_HZ);
-  double x = ((double)velocity*(double)(1 << pulse_div_))/((double)clock_frequency_*(double)MHZ_PER_HZ);
+  // (velocity*(1 << pulse_div_[motor])*VELOCITY_CONSTANT)/(clock_frequency_*MHZ_PER_HZ);
+  double x = ((double)velocity*(double)(1 << pulse_div_[motor]))/((double)clock_frequency_*(double)MHZ_PER_HZ);
   double y = x*(double)VELOCITY_CONSTANT;
   return y;
 }
 
-void TMC429::setOptimalPulseDiv(const uint32_t velocity_max)
+void TMC429::setOptimalPulseDiv(const size_t motor,
+                                const uint32_t velocity_max)
 {
   int8_t pulse_div = PULSE_DIV_MAX + 1;
   uint32_t v_max = 0;
@@ -463,12 +468,12 @@ void TMC429::setOptimalPulseDiv(const uint32_t velocity_max)
     --pulse_div;
     v_max = (VELOCITY_REGISTER_MAX*MHZ_PER_HZ)/((1 << pulse_div)*(VELOCITY_REGISTER_MAX + 1));
   }
-  pulse_div_ = pulse_div;
+  pulse_div_[motor] = pulse_div;
   ClkConfig clk_config;
-  clk_config.uint32 = readRegister(SMDA_COMMON,ADDRESS_CLOCK_CONFIGURATION);
+  clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
   clk_config.fields.clk_config.pulse_div = pulse_div;
   Serial << "pulse_div: " << clk_config.fields.clk_config.pulse_div << "\n";
-  writeRegister(SMDA_COMMON,ADDRESS_CLOCK_CONFIGURATION,clk_config.uint32);
+  writeRegister(motor,ADDRESS_CLOCK_CONFIGURATION,clk_config.uint32);
 }
 
 uint16_t TMC429::getVelocityMin(const size_t motor)
@@ -480,7 +485,8 @@ uint16_t TMC429::getVelocityMin(const size_t motor)
   return readRegister(motor,ADDRESS_V_MIN);
 }
 
-void TMC429::setVelocityMin(const size_t motor, const uint16_t velocity)
+void TMC429::setVelocityMin(const size_t motor,
+                            const uint16_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -498,7 +504,8 @@ uint16_t TMC429::getVelocityMax(const size_t motor)
   return readRegister(motor,ADDRESS_V_MAX);
 }
 
-void TMC429::setVelocityMax(const size_t motor, const uint16_t velocity)
+void TMC429::setVelocityMax(const size_t motor,
+                            const uint16_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -521,7 +528,8 @@ int16_t TMC429::getVelocityTarget(const size_t motor)
   return velocity;
 }
 
-void TMC429::setVelocityTarget(const size_t motor, const int16_t velocity)
+void TMC429::setVelocityTarget(const size_t motor,
+                               const int16_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
