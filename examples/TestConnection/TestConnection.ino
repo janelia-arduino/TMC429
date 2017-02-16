@@ -56,8 +56,15 @@ void loop()
 
   uint32_t velocity_min = 100;
   uint32_t velocity_max = 2000;
-  step_dir_controller.setVelocityMinMaxInHz(MOTOR,velocity_min,velocity_max);
-  Serial << "setVelocityMinMaxInHz: " << velocity_min << ", " << velocity_max << "\n";
+  uint32_t acceleration_max = 2000;
+  step_dir_controller.setLimitsInHz(MOTOR,velocity_min,velocity_max,acceleration_max);
+  Serial << "setLimitsInHz: " << velocity_min << ", " << velocity_max << ", " << acceleration_max << "\n";
+
+  acceleration_max = step_dir_controller.getAccelerationMaxInHzPerS(MOTOR);
+  Serial << "acceleration_max: " << acceleration_max << "\n";
+
+  uint32_t acceleration_actual = step_dir_controller.getAccelerationActualInHzPerS(MOTOR);
+  Serial << "acceleration_actual: " << acceleration_actual << "\n";
 
   velocity_min = step_dir_controller.getVelocityMinInHz(MOTOR);
   Serial << "velocity_min: " << velocity_min << "\n";
@@ -131,7 +138,7 @@ void loop()
   Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
   Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
 
-  double step_time = step_dir_controller.getStepTimeInMicroSeconds();
+  double step_time = step_dir_controller.getStepTimeInMicroS();
   Serial << "step_time: " << step_time << "\n";
 
   Serial << "\n";

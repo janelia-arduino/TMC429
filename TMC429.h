@@ -43,9 +43,15 @@ public:
 
   uint32_t getVelocityMaxMaxInHz();
 
-  void setVelocityMinMaxInHz(const size_t motor,
-                             const uint32_t velocity_min,
-                             const uint32_t velocity_max);
+  void setLimitsInHz(const size_t motor,
+                     const uint32_t velocity_min,
+                     const uint32_t velocity_max,
+                     const uint32_t acceleration_max);
+
+  uint32_t getAccelerationMaxInHzPerS(const size_t motor);
+
+  uint32_t getAccelerationActualInHzPerS(const size_t motor);
+
   uint32_t getVelocityMinInHz(const size_t motor);
   uint32_t getVelocityMaxInHz(const size_t motor);
 
@@ -153,7 +159,7 @@ public:
   };
 
   ClockConfiguration getClockConfiguration(const size_t motor);
-  double getStepTimeInMicroSeconds();
+  double getStepTimeInMicroS();
 
 
 private:
@@ -172,10 +178,14 @@ private:
   const static uint32_t MHZ_PER_HZ = 1000000;
   const static uint32_t VELOCITY_CONSTANT = 65536;
   const static uint32_t VELOCITY_REGISTER_MAX = 2047;
+  const static uint8_t RAMP_DIV_MAX = 13;
+  const static uint32_t ACCELERATION_REGISTER_MAX = 2047;
+  const static uint32_t ACCELERATION_CONSTANT = 536870912; // (1 << 29)
 
   Status status_;
   uint8_t clock_frequency_;
   uint8_t pulse_div_[MOTOR_COUNT];
+  uint8_t ramp_div_[MOTOR_COUNT];
 
   // MOSI Datagrams
   union MosiDatagram
@@ -334,17 +344,18 @@ private:
 
   void specifyClockFrequencyInMHz(const uint8_t clock_frequency);
 
-  int32_t convertVelocityToHz(const size_t motor,
-                              const int16_t velocity);
-  int16_t convertVelocityFromHz(const size_t motor,
-                                const int32_t velocity);
-  void setOptimalPulseDiv(const size_t motor,
-                          const uint32_t velocity_max);
-
   void setOptimalStepDiv(const uint32_t velocity_max);
   uint8_t getStepDiv();
   void setStepDiv(const uint8_t step_div);
   double stepDivToStepTime(const uint8_t step_div);
+
+  int32_t convertVelocityToHz(const size_t motor,
+                              const int16_t velocity);
+  int16_t convertVelocityFromHz(const size_t motor,
+                                const int32_t velocity);
+
+  void setOptimalPulseDiv(const size_t motor,
+                          const uint32_t velocity_max);
 
   uint16_t getVelocityMin(const size_t motor);
   void setVelocityMin(const size_t motor,
@@ -359,6 +370,20 @@ private:
                          const int16_t velocity);
 
   int16_t getVelocityActual(const size_t motor);
+
+  int32_t convertAccelerationToHzPerS(const size_t motor,
+                                      const int16_t acceleration);
+  int16_t convertAccelerationFromHzPerS(const size_t motor,
+                                        const int32_t acceleration);
+
+  void setOptimalRampDiv(const size_t motor,
+                         const uint32_t acceleration_max);
+
+  uint16_t getAccelerationMax(const size_t motor);
+  void setAccelerationMax(const size_t motor,
+                          const uint16_t acceleration);
+
+  int16_t getAccelerationActual(const size_t motor);
 
 };
 
