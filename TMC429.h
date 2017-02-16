@@ -168,6 +168,7 @@ private:
 
   const static uint8_t CLOCK_FREQUENCY_MAX = 32;
   const static uint8_t PULSE_DIV_MAX = 13;
+  const static uint8_t STEP_DIV_MAX = 15;
   const static uint32_t MHZ_PER_HZ = 1000000;
   const static uint32_t VELOCITY_CONSTANT = 65536;
   const static uint32_t VELOCITY_REGISTER_MAX = 2047;
@@ -245,6 +246,7 @@ private:
   const static uint32_t V_MASK = 0xfff;
   const static uint32_t A_MAX_MASK = 0x7ff;
   const static uint32_t A_MASK = 0xfff;
+  const static uint8_t STEP_DIV_MASK = 0xf;
 
   // union structs
   union PFactor
@@ -338,6 +340,11 @@ private:
                                 const int32_t velocity);
   void setOptimalPulseDiv(const size_t motor,
                           const uint32_t velocity_max);
+
+  void setOptimalStepDiv(const uint32_t velocity_max);
+  uint8_t getStepDiv();
+  void setStepDiv(const uint8_t step_div);
+  double stepDivToStepTime(const uint8_t step_div);
 
   uint16_t getVelocityMin(const size_t motor);
   void setVelocityMin(const size_t motor,

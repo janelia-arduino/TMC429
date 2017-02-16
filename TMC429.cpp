@@ -24,6 +24,8 @@ void TMC429::setup(const size_t cs_pin,
   }
 
   SPI.begin();
+
+  setStepDiv(STEP_DIV_MAX);
 }
 
 uint32_t TMC429::getVersion()
@@ -99,6 +101,8 @@ void TMC429::setVelocityMinMaxInHz(const size_t motor,
   {
     return;
   }
+
+  setOptimalStepDiv(velocity_max);
 
   setOptimalPulseDiv(motor,velocity_max);
 
@@ -373,12 +377,8 @@ TMC429::ClockConfiguration TMC429::getClockConfiguration(const size_t motor)
 
 double TMC429::getStepTimeInMicroSeconds()
 {
-  GlobalParameters global_parameters;
-  global_parameters.uint32 = readRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS);
-  uint8_t stpdiv_429 = global_parameters.fields.clk2_div;
-  Serial << "stpdiv_429: " << stpdiv_429 << "\n";
-  double step_time = 16*(1 + stpdiv_429)/clock_frequency_;
-  return step_time;
+  uint8_t step_div = getStepDiv();
+  return stepDivToStepTime(step_div);
 }
 
 // private
@@ -472,8 +472,46 @@ void TMC429::setOptimalPulseDiv(const size_t motor,
   ClkConfig clk_config;
   clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
   clk_config.fields.clk_config.pulse_div = pulse_div;
-  Serial << "pulse_div: " << clk_config.fields.clk_config.pulse_div << "\n";
   writeRegister(motor,ADDRESS_CLOCK_CONFIGURATION,clk_config.uint32);
+}
+
+void TMC429::setOptimalStepDiv(const uint32_t velocity_max)
+{
+  int step_div = getStepDiv();
+
+  double step_time = stepDivToStepTime(step_div);
+
+  uint32_t v_max = (double)MHZ_PER_HZ/(step_time*2);
+
+  while ((v_max < velocity_max) && (step_div >= 1))
+  {
+    --step_div;
+    step_time = stepDivToStepTime(step_div);
+    v_max = (double)MHZ_PER_HZ/(step_time*2);
+  }
+
+  setStepDiv(step_div);
+}
+
+uint8_t TMC429::getStepDiv()
+{
+  GlobalParameters global_parameters;
+  global_parameters.uint32 = readRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS);
+  return global_parameters.fields.clk2_div & STEP_DIV_MASK;
+}
+
+void TMC429::setStepDiv(const uint8_t step_div)
+{
+  GlobalParameters global_parameters;
+  global_parameters.uint32 = readRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS);
+  global_parameters.fields.clk2_div = step_div & STEP_DIV_MASK;
+  writeRegister(SMDA_COMMON,ADDRESS_GLOBAL_PARAMETERS,global_parameters.uint32);
+}
+
+double TMC429::stepDivToStepTime(const uint8_t step_div)
+{
+  double step_time = (double)(16*(1 + step_div))/(double)clock_frequency_;
+  return step_time;
 }
 
 uint16_t TMC429::getVelocityMin(const size_t motor)
