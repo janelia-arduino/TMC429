@@ -6,7 +6,7 @@
 const int BAUDRATE = 115200;
 const int LOOP_DELAY = 2000;
 const int CS_PIN = 10;
-const int CLOCK_FREQUENCY_MHZ = 32;
+const int CLOCK_FREQUENCY_MHZ = 16;
 const int MOTOR = 0;
 
 // Instantiate TMC429
@@ -31,8 +31,8 @@ void setup()
 
 void loop()
 {
-  // step_dir_controller.setMode(MOTOR,TMC429::VELOCITY_MODE);
-  step_dir_controller.setMode(MOTOR,TMC429::RAMP_MODE);
+  step_dir_controller.setMode(MOTOR,TMC429::VELOCITY_MODE);
+  // step_dir_controller.setMode(MOTOR,TMC429::RAMP_MODE);
 
   TMC429::Mode mode = step_dir_controller.getMode(MOTOR);
   if (mode == TMC429::RAMP_MODE)
@@ -56,8 +56,8 @@ void loop()
   Serial << "velocity_max_upper_limit: " << velocity_max_upper_limit << "\n";
 
   uint32_t velocity_min = 100;
-  uint32_t velocity_max = 2000;
-  uint32_t acceleration_max = 20000;
+  uint32_t velocity_max = 20000;
+  uint32_t acceleration_max = 40000;
   step_dir_controller.setLimitsInHz(MOTOR,velocity_min,velocity_max,acceleration_max);
   Serial << "setLimitsInHz: " << velocity_min << ", " << velocity_max << ", " << acceleration_max << "\n";
 
@@ -76,7 +76,7 @@ void loop()
   velocity_max = step_dir_controller.getVelocityMaxInHz(MOTOR);
   Serial << "velocity_max: " << velocity_max << "\n";
 
-  int16_t velocity_target = 321;
+  int16_t velocity_target = 10000;
   step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
   Serial << "set velocity_target: " << velocity_target << "\n";
 
