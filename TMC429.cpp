@@ -96,7 +96,7 @@ void TMC429::setMode(const size_t motor,
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
 }
 
-uint32_t TMC429::getVelocityMaxMaxInHz()
+uint32_t TMC429::getVelocityMaxUpperLimitInHz()
 {
   // (clock_frequency_*MHZ_PER_HZ*VELOCITY_REGISTER_MAX)/(VELOCITY_CONSTANT);
   double x = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)VELOCITY_CONSTANT;
@@ -136,6 +136,26 @@ uint32_t TMC429::getAccelerationMaxInHzPerS(const size_t motor)
     return 0;
   }
   return convertAccelerationToHzPerS(motor,getAccelerationMax(motor));
+}
+
+uint32_t TMC429::getAccelerationMaxUpperLimitInHzPerS(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  uint8_t ramp_div_min = pulse_div_[motor] - 1;
+  uint32_t a_max_upper_limit = (1 << (ramp_div_min - pulse_div_[motor] + 12));
+  if (a_max_upper_limit > ACCELERATION_REGISTER_MAX)
+  {
+    a_max_upper_limit = ACCELERATION_REGISTER_MAX;
+  }
+  double a = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)ACCELERATION_CONSTANT;
+  double b = a*(double)clock_frequency_*(double)MHZ_PER_HZ;
+  double c = b/((double)(1 << pulse_div_[motor]));
+  double d = c/((double)(1 << ramp_div_min));
+  double e = d*(double)a_max_upper_limit;
+  return e;
 }
 
 uint32_t TMC429::getAccelerationActualInHzPerS(const size_t motor)
@@ -235,6 +255,7 @@ void TMC429::setPositionActual(const size_t motor,
 
 TMC429::Status TMC429::getStatus()
 {
+  getVersion();
   return status_;
 }
 
@@ -452,6 +473,19 @@ TMC429::ClockConfiguration TMC429::getClockConfiguration(const size_t motor)
     clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
   }
   return clk_config.fields.clk_config;
+}
+
+double TMC429::getProportionalityFactor(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0.0;
+  }
+  PropFactor prop_factor;
+  prop_factor.uint32 = readRegister(motor,ADDRESS_PROP_FACTOR);
+  int pm = prop_factor.fields.pmul;
+  int pd = prop_factor.fields.pdiv;
+  return ((double)(pm)) / ((double)(1 << (pd + 3)));
 }
 
 double TMC429::getStepTimeInMicroS()
@@ -683,18 +717,43 @@ void TMC429::setOptimalRampDiv(const size_t motor,
   writeRegister(motor,ADDRESS_CLOCK_CONFIGURATION,clk_config.uint32);
 }
 
+uint16_t TMC429::getAccelerationMaxUpperLimit(const size_t motor)
+{
+  uint32_t a_max_upper_limit = (1 << (ramp_div_[motor] - pulse_div_[motor] + 12));
+  if (a_max_upper_limit > ACCELERATION_REGISTER_MAX)
+  {
+    a_max_upper_limit = ACCELERATION_REGISTER_MAX;
+  }
+  return a_max_upper_limit;
+}
+
+uint16_t TMC429::getAccelerationMaxLowerLimit(const size_t motor)
+{
+  uint32_t a_max_lower_limit = (1 << (ramp_div_[motor] - pulse_div_[motor] - 1));
+  return a_max_lower_limit;
+}
+
 uint16_t TMC429::getAccelerationMax(const size_t motor)
 {
   return readRegister(motor,ADDRESS_A_MAX);
 }
 
-void TMC429::setAccelerationMax(const size_t motor,
-                                const uint16_t acceleration)
+uint16_t TMC429::setAccelerationMax(const size_t motor,
+                                    const uint16_t acceleration)
 {
-  uint32_t a_max_min = (1 << (ramp_div_[motor] - pulse_div_[motor] - 1));
-  uint32_t a_max_max = (1 << (ramp_div_[motor] - pulse_div_[motor] + 12));
-  if 
-  writeRegister(motor,ADDRESS_A_MAX,acceleration);
+  uint32_t a_max = acceleration;
+  uint32_t a_max_upper_limit = getAccelerationMaxUpperLimit(motor);
+  uint32_t a_max_lower_limit = getAccelerationMaxLowerLimit(motor);
+  if (a_max > a_max_upper_limit)
+  {
+    a_max = a_max_upper_limit;
+  }
+  else if (a_max < a_max_lower_limit)
+  {
+    a_max = a_max_lower_limit;
+  }
+  writeRegister(motor,ADDRESS_A_MAX,a_max);
+  return a_max;
 }
 
 int16_t TMC429::getAccelerationActual(const size_t motor)
@@ -731,7 +790,7 @@ void TMC429::setOptimalPropFactor(const size_t motor,
   // *PRedu = p_reduced;
 
   int pdiv, pmul, pm, pd ;
-  double p_ideal, p_best, p_reduced;
+  double p_ideal, p_reduced;
 
   pm=-1; pd=-1; // -1 indicates : no valid pair found
   p_ideal = acceleration_max/(128.0*(1 << (ramp_div_[motor] - pulse_div_[motor])));
@@ -744,13 +803,15 @@ void TMC429::setOptimalPropFactor(const size_t motor,
       pm = pmul + 128;
       pd = pdiv;
     }
-    p_best = ((double)(pm)) / ((double)(1 << (pd + 3)));
   }
-  Serial << "acceleration_max: " << acceleration_max << "\n";
-  Serial << "p_ideal: " << p_ideal << "\n";
-  Serial << "p_best: " << p_best << "\n";
-  Serial << "p_reduced: " << p_reduced << "\n";
-  Serial << "p_mul: " << pm << "\n";
-  Serial << "p_div: " << pd << "\n";
+  if ((pm == -1) || (pd == -1))
+  {
+    return;
+  }
+  PropFactor prop_factor;
+  prop_factor.uint32 = readRegister(motor,ADDRESS_PROP_FACTOR);
+  prop_factor.fields.pmul = pm;
+  prop_factor.fields.pdiv = pd;
+  writeRegister(motor,ADDRESS_PROP_FACTOR,prop_factor.uint32);
 }
 

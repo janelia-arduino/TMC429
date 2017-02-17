@@ -41,7 +41,7 @@ public:
   void setMode(const size_t motor,
                const Mode mode);
 
-  uint32_t getVelocityMaxMaxInHz();
+  uint32_t getVelocityMaxUpperLimitInHz();
 
   void setLimitsInHz(const size_t motor,
                      const uint32_t velocity_min,
@@ -49,6 +49,7 @@ public:
                      const uint32_t acceleration_max);
 
   uint32_t getAccelerationMaxInHzPerS(const size_t motor);
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(const size_t motor);
 
   uint32_t getAccelerationActualInHzPerS(const size_t motor);
 
@@ -159,8 +160,9 @@ public:
   };
 
   ClockConfiguration getClockConfiguration(const size_t motor);
-  double getStepTimeInMicroS();
+  double getProportionalityFactor(const size_t motor);
 
+  double getStepTimeInMicroS();
 
 private:
   // SPISettings
@@ -213,7 +215,7 @@ private:
   const static uint8_t ADDRESS_A_MAX = 0b0110;
   const static uint8_t ADDRESS_A_ACTUAL = 0b0111;
   const static uint8_t ADDRESS_A_THRESHOLD = 0b1000;
-  const static uint8_t ADDRESS_P_FACTOR = 0b1001;
+  const static uint8_t ADDRESS_PROP_FACTOR = 0b1001;
   const static uint8_t ADDRESS_REF_CONF_MODE = 0b1010;
   const static uint8_t ADDRESS_INTERRUPT = 0b1011;
   const static uint8_t ADDRESS_CLOCK_CONFIGURATION = 0b1100;
@@ -251,11 +253,6 @@ private:
   };
 
   // Masks
-  // const static uint32_t X_MASK = 0xffffff;
-  // const static uint32_t V_MIN_MAX_MASK = 0x7ff;
-  // const static uint32_t V_MASK = 0xfff;
-  // const static uint32_t A_MAX_MASK = 0x7ff;
-  // const static uint32_t A_MASK = 0xfff;
   const static uint8_t STEP_DIV_MASK = 0xf;
 
   // Bit Count
@@ -270,8 +267,7 @@ private:
     {
       uint8_t pdiv : 4;
       uint8_t space0 : 4;
-      uint8_t pmul : 7;
-      uint8_t one : 1;
+      uint8_t pmul : 8;
       uint8_t space1 : 8;
       uint8_t space2 : 8;
     } fields;
@@ -385,6 +381,9 @@ private:
 
   void setOptimalRampDiv(const size_t motor,
                          const uint32_t acceleration_max_hz_per_s);
+
+  uint16_t getAccelerationMaxUpperLimit(const size_t motor);
+  uint16_t getAccelerationMaxLowerLimit(const size_t motor);
 
   uint16_t getAccelerationMax(const size_t motor);
   uint16_t setAccelerationMax(const size_t motor,

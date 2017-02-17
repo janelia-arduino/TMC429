@@ -52,17 +52,20 @@ void loop()
     Serial << "mode: hold_mode\n";
   }
 
-  uint32_t velocity_max_max = step_dir_controller.getVelocityMaxMaxInHz();
-  Serial << "velocity_max_max: " << velocity_max_max << "\n";
+  uint32_t velocity_max_upper_limit = step_dir_controller.getVelocityMaxUpperLimitInHz();
+  Serial << "velocity_max_upper_limit: " << velocity_max_upper_limit << "\n";
 
   uint32_t velocity_min = 100;
   uint32_t velocity_max = 2000;
-  uint32_t acceleration_max = 2000;
+  uint32_t acceleration_max = 20000;
   step_dir_controller.setLimitsInHz(MOTOR,velocity_min,velocity_max,acceleration_max);
   Serial << "setLimitsInHz: " << velocity_min << ", " << velocity_max << ", " << acceleration_max << "\n";
 
   acceleration_max = step_dir_controller.getAccelerationMaxInHzPerS(MOTOR);
   Serial << "acceleration_max: " << acceleration_max << "\n";
+
+  acceleration_max = step_dir_controller.getAccelerationMaxUpperLimitInHzPerS(MOTOR);
+  Serial << "acceleration_max_upper_limit: " << acceleration_max << "\n";
 
   uint32_t acceleration_actual = step_dir_controller.getAccelerationActualInHzPerS(MOTOR);
   Serial << "acceleration_actual: " << acceleration_actual << "\n";
@@ -83,7 +86,7 @@ void loop()
   int16_t velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
   Serial << "velocity_actual: " << velocity_actual << "\n";
 
-  int32_t position_target = -12345;
+  int32_t position_target = 12345;
   step_dir_controller.setPositionTarget(MOTOR,position_target);
   Serial << "set position_target: " << position_target << "\n";
 
@@ -138,6 +141,9 @@ void loop()
   Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
   Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
   Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
+
+  double proportionality_factor = step_dir_controller.getProportionalityFactor(MOTOR);
+  Serial << "proportionality_factor: " << proportionality_factor << "\n";
 
   double step_time = step_dir_controller.getStepTimeInMicroS();
   Serial << "step_time: " << step_time << "\n";
