@@ -111,15 +111,15 @@ public:
 
   struct InterfaceConfiguration
   {
-    uint8_t inv_ref : 1;
-    uint8_t sdo_int : 1;
-    uint8_t step_half : 1;
-    uint8_t inv_stp : 1;
-    uint8_t inv_dir : 1;
-    uint8_t en_sd : 1;
-    uint8_t pos_comp_sel : 2;
-    uint8_t en_refr : 1;
-    uint8_t space : 7;
+    uint16_t inv_ref : 1;
+    uint16_t sdo_int : 1;
+    uint16_t step_half : 1;
+    uint16_t inv_stp : 1;
+    uint16_t inv_dir : 1;
+    uint16_t en_sd : 1;
+    uint16_t pos_comp_sel : 2;
+    uint16_t en_refr : 1;
+    uint16_t space : 7;
   };
 
   InterfaceConfiguration getInterfaceConfiguration();
@@ -153,10 +153,10 @@ public:
 
   struct ClockConfiguration
   {
-    uint8_t usrs : 3;
-    uint8_t space0 : 5;
-    uint8_t ramp_div : 4;
-    uint8_t pulse_div : 4;
+    uint16_t usrs : 3;
+    uint16_t space0 : 5;
+    uint16_t ramp_div : 4;
+    uint16_t pulse_div : 4;
   };
 
   ClockConfiguration getClockConfiguration(const size_t motor);
@@ -195,10 +195,10 @@ private:
     struct Fields
     {
       uint32_t data : 24;
-      uint8_t rw : 1;
-      uint8_t address : 4;
-      uint8_t smda : 2;
-      uint8_t rrs : 1;
+      uint32_t rw : 1;
+      uint32_t address : 4;
+      uint32_t smda : 2;
+      uint32_t rrs : 1;
     } fields;
     uint32_t uint32;
   };
@@ -265,11 +265,11 @@ private:
   {
     struct Fields
     {
-      uint8_t pdiv : 4;
-      uint8_t space0 : 4;
-      uint8_t pmul : 8;
-      uint8_t space1 : 8;
-      uint8_t space2 : 8;
+      uint32_t pdiv : 4;
+      uint32_t space0 : 4;
+      uint32_t pmul : 8;
+      uint32_t space1 : 8;
+      uint32_t space2 : 8;
     } fields;
     uint32_t uint32;
   };
@@ -277,12 +277,12 @@ private:
   {
     struct Fields
     {
-      uint8_t mode : 2;
-      uint8_t space0 : 6;
+      uint32_t mode : 2;
+      uint32_t space0 : 6;
       ReferenceConfiguration ref_conf;
-      uint8_t lp : 1;
-      uint8_t space1 : 7;
-      uint8_t space2 : 8;
+      uint32_t lp : 1;
+      uint32_t space1 : 7;
+      uint32_t space2 : 8;
     } fields;
     uint32_t uint32;
   };
@@ -291,7 +291,7 @@ private:
     struct Fields
     {
       InterfaceConfiguration if_conf;
-      uint16_t space0 : 16;
+      uint32_t space0 : 16;
     } fields;
     uint32_t uint32;
   };
@@ -300,7 +300,7 @@ private:
     struct Fields
     {
       SwitchState switch_state;
-      uint16_t space0 : 16;
+      uint32_t space0 : 16;
     } fields;
     uint32_t uint32;
   };
@@ -308,19 +308,19 @@ private:
   {
     struct Fields
     {
-      uint8_t lsmd : 2;
-      uint8_t nscs_s : 1;
-      uint8_t sck_s : 1;
-      uint8_t ph_ab : 1;
-      uint8_t fd_ab : 1;
-      uint8_t dac_ab : 1;
-      uint8_t cs_com_ind : 1;
-      uint8_t clk2_div : 8;
-      uint8_t cont_update : 1;
-      uint8_t space0 : 3;
-      uint8_t ref_mux : 1;
-      uint8_t mot1r : 1;
-      uint8_t space1 : 2;
+      uint32_t lsmd : 2;
+      uint32_t nscs_s : 1;
+      uint32_t sck_s : 1;
+      uint32_t ph_ab : 1;
+      uint32_t fd_ab : 1;
+      uint32_t dac_ab : 1;
+      uint32_t cs_com_ind : 1;
+      uint32_t clk2_div : 8;
+      uint32_t cont_update : 1;
+      uint32_t space0 : 3;
+      uint32_t ref_mux : 1;
+      uint32_t mot1r : 1;
+      uint32_t space1 : 2;
     } fields;
     uint32_t uint32;
   };
@@ -329,7 +329,7 @@ private:
     struct Fields
     {
       ClockConfiguration clk_config;
-      uint16_t space0 : 16;
+      uint32_t space0 : 16;
     } fields;
     uint32_t uint32;
   };
