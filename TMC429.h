@@ -27,7 +27,7 @@ public:
   bool checkVersion();
 
   void setStepDirOutput();
-  void setSpiOutput();
+  // void setSpiOutput();
 
   enum Mode
     {

@@ -47,13 +47,13 @@ void TMC429::setStepDirOutput()
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
-void TMC429::setSpiOutput()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_sd = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
+// void TMC429::setSpiOutput()
+// {
+//   IfConf if_conf;
+//   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+//   if_conf.fields.if_conf.en_sd = 0;
+//   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+// }
 
 TMC429::Mode TMC429::getMode(const size_t motor)
 {
