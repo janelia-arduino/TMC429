@@ -21,7 +21,7 @@ class TMC429
 {
 public:
   void setup(const size_t cs_pin,
-             const uint8_t clock_frequency);
+             const uint8_t clock_frequency_mhz);
 
   uint32_t getVersion();
   bool checkVersion();

@@ -9,7 +9,7 @@
 
 
 void TMC429::setup(const size_t cs_pin,
-                   const uint8_t clock_frequency)
+                   const uint8_t clock_frequency_mhz)
 {
   cs_pin_ = cs_pin;
 
