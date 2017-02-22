@@ -16,7 +16,7 @@ void TMC429::setup(const size_t cs_pin,
   pinMode(cs_pin_,OUTPUT);
   digitalWrite(cs_pin_,HIGH);
 
-  specifyClockFrequencyInMHz(clock_frequency);
+  specifyClockFrequencyInMHz(clock_frequency_mhz);
 
   for (uint8_t motor=0; motor<MOTOR_COUNT; ++motor)
   {
