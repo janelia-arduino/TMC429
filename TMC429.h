@@ -70,6 +70,9 @@ public:
   void setPositionActual(const size_t motor,
                          const int32_t position);
 
+  void stop(const size_t motor);
+  void stopAll();
+
   struct Status
   {
     uint8_t at_target_position_0 : 1;

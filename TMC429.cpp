@@ -27,6 +27,8 @@ void TMC429::setup(const size_t cs_pin,
   SPI.begin();
 
   setStepDiv(STEP_DIV_MAX);
+
+  stopAll();
 }
 
 uint32_t TMC429::getVersion()
@@ -251,6 +253,24 @@ void TMC429::setPositionActual(const size_t motor,
     return;
   }
   writeRegister(motor,ADDRESS_X_ACTUAL,position);
+}
+
+void TMC429::stop(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  setMode(motor,VELOCITY_MODE);
+  setVelocityTarget(motor,0);
+}
+
+void TMC429::stopAll()
+{
+  for (uint8_t motor=0; motor<MOTOR_COUNT; ++motor)
+  {
+    stop(motor);
+  }
 }
 
 TMC429::Status TMC429::getStatus()

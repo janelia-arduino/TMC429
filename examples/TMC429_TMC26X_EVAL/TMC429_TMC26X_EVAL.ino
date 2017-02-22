@@ -54,6 +54,7 @@ void setup()
   }
 
   velocity_target = 0;
+
 }
 
 void loop()
@@ -61,6 +62,10 @@ void loop()
   velocity_target += velocity_inc;
   if (velocity_target > velocity_max)
   {
+    step_dir_controller.stop(MOTOR);
+    Serial << "stopping motor!\n";
+    delay(LOOP_DELAY*5);
+
     velocity_target = velocity_inc;
   }
   step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
