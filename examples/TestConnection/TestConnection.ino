@@ -56,7 +56,7 @@ void loop()
   Serial << "velocity_max_upper_limit: " << velocity_max_upper_limit << "\n";
 
   uint32_t velocity_min = 100;
-  uint32_t velocity_max = 20000;
+  uint32_t velocity_max = 100000;
   uint32_t acceleration_max = 40000;
   step_dir_controller.setLimitsInHz(MOTOR,velocity_min,velocity_max,acceleration_max);
   Serial << "setLimitsInHz: " << velocity_min << ", " << velocity_max << ", " << acceleration_max << "\n";
@@ -76,14 +76,14 @@ void loop()
   velocity_max = step_dir_controller.getVelocityMaxInHz(MOTOR);
   Serial << "velocity_max: " << velocity_max << "\n";
 
-  int16_t velocity_target = 10000;
+  long velocity_target = -50000;
   step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
   Serial << "set velocity_target: " << velocity_target << "\n";
 
   velocity_target = step_dir_controller.getVelocityTargetInHz(MOTOR);
   Serial << "velocity_target: " << velocity_target << "\n";
 
-  int16_t velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
+  long velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
   Serial << "velocity_actual: " << velocity_actual << "\n";
 
   int32_t position_target = 12345;

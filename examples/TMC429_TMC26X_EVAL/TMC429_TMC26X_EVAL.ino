@@ -53,7 +53,7 @@ void setup()
     stepper_drivers[motor].setCurrentScalePercent(CURRENT_SCALE_PERCENT);
   }
 
-  velocity_target = 0;
+  velocity_target = -velocity_max;
 
 }
 
@@ -66,7 +66,7 @@ void loop()
     Serial << "stopping motor!\n";
     delay(LOOP_DELAY*5);
 
-    velocity_target = velocity_inc;
+    velocity_target = -velocity_max;
   }
   step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
   Serial << "set velocity_target: " << velocity_target << "\n";
