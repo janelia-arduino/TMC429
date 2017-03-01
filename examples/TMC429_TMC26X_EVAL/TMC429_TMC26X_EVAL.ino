@@ -72,17 +72,18 @@ void loop()
   }
   step_dir_controller.setTargetVelocityInHz(MOTOR,target_velocity);
   Serial << "set target_velocity: " << target_velocity << "\n";
+  Serial << "at target_velocity: " << step_dir_controller.atTargetVelocity(MOTOR) << "\n";
 
   target_velocity = step_dir_controller.getTargetVelocityInHz(MOTOR);
 
   do
   {
     actual_velocity = step_dir_controller.getActualVelocityInHz(MOTOR);
-    Serial << "actual_velocity: " << actual_velocity << " target_velocity: " << target_velocity << "\n";
+    Serial << "actual_velocity: " << actual_velocity << "\n";
     delay(LOOP_DELAY);
   }
   while (actual_velocity != target_velocity);
 
-  Serial << "actual_velocity == target_velocity == : " << actual_velocity << "!\n";
+  Serial << "at target_velocity: " << step_dir_controller.atTargetVelocity(MOTOR) << "\n";
   Serial << "\n";
 }

@@ -59,12 +59,14 @@ public:
   int32_t getTargetVelocityInHz(const size_t motor);
   void setTargetVelocityInHz(const size_t motor,
                              const int32_t velocity);
+  bool atTargetVelocity(const size_t motor);
 
   int32_t getActualVelocityInHz(const size_t motor);
 
   int32_t getTargetPosition(const size_t motor);
   void setTargetPosition(const size_t motor,
                          const int32_t position);
+  bool atTargetPosition(const size_t motor);
 
   int32_t getActualPosition(const size_t motor);
   void setActualPosition(const size_t motor,

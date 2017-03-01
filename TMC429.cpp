@@ -206,6 +206,17 @@ void TMC429::setTargetVelocityInHz(const size_t motor,
   setTargetVelocity(motor,convertVelocityFromHz(motor,velocity));
 }
 
+bool TMC429::atTargetVelocity(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return true;
+  }
+  int16_t actual_velocity = getActualVelocity(motor);
+  int16_t target_velocity = getTargetVelocity(motor);
+  return (actual_velocity == target_velocity);
+}
+
 int32_t TMC429::getActualVelocityInHz(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -233,6 +244,17 @@ void TMC429::setTargetPosition(const size_t motor,
     return;
   }
   writeRegister(motor,ADDRESS_X_TARGET,position);
+}
+
+bool TMC429::atTargetPosition(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return true;
+  }
+  int32_t actual_position = getActualPosition(motor);
+  int32_t target_position = getTargetPosition(motor);
+  return (actual_position == target_position);
 }
 
 int32_t TMC429::getActualPosition(const size_t motor)
