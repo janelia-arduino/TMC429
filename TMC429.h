@@ -51,23 +51,23 @@ public:
   uint32_t getAccelerationMaxInHzPerS(const size_t motor);
   uint32_t getAccelerationMaxUpperLimitInHzPerS(const size_t motor);
 
-  uint32_t getAccelerationActualInHzPerS(const size_t motor);
+  uint32_t getActualAccelerationInHzPerS(const size_t motor);
 
   uint32_t getVelocityMinInHz(const size_t motor);
   uint32_t getVelocityMaxInHz(const size_t motor);
 
-  int32_t getVelocityTargetInHz(const size_t motor);
-  void setVelocityTargetInHz(const size_t motor,
+  int32_t getTargetVelocityInHz(const size_t motor);
+  void setTargetVelocityInHz(const size_t motor,
                              const int32_t velocity);
 
-  int32_t getVelocityActualInHz(const size_t motor);
+  int32_t getActualVelocityInHz(const size_t motor);
 
-  int32_t getPositionTarget(const size_t motor);
-  void setPositionTarget(const size_t motor,
+  int32_t getTargetPosition(const size_t motor);
+  void setTargetPosition(const size_t motor,
                          const int32_t position);
 
-  int32_t getPositionActual(const size_t motor);
-  void setPositionActual(const size_t motor,
+  int32_t getActualPosition(const size_t motor);
+  void setActualPosition(const size_t motor,
                          const int32_t position);
 
   void stop(const size_t motor);
@@ -371,11 +371,11 @@ private:
   void setVelocityMax(const size_t motor,
                       const uint16_t velocity);
 
-  int16_t getVelocityTarget(const size_t motor);
-  void setVelocityTarget(const size_t motor,
+  int16_t getTargetVelocity(const size_t motor);
+  void setTargetVelocity(const size_t motor,
                          const int16_t velocity);
 
-  int16_t getVelocityActual(const size_t motor);
+  int16_t getActualVelocity(const size_t motor);
 
   int32_t convertAccelerationToHzPerS(const size_t motor,
                                       const int16_t acceleration);
@@ -392,7 +392,7 @@ private:
   uint16_t setAccelerationMax(const size_t motor,
                               const uint16_t acceleration);
 
-  int16_t getAccelerationActual(const size_t motor);
+  int16_t getActualAcceleration(const size_t motor);
 
   void setOptimalPropFactor(const size_t motor,
                             const uint16_t acceleration_max);

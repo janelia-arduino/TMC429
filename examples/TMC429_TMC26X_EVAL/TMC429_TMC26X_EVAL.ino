@@ -23,7 +23,7 @@ const int MOTOR = 0;
 TMC429 step_dir_controller;
 TMC26X stepper_drivers[MOTOR_COUNT];
 long velocity_inc, velocity_max;
-long velocity_target, velocity_actual;
+long target_velocity, actual_velocity;
 
 void setup()
 {
@@ -55,34 +55,34 @@ void setup()
     stepper_drivers[motor].setMicrostepsPerStepTo256();
   }
 
-  velocity_target = -velocity_max;
+  target_velocity = -velocity_max;
 
 }
 
 void loop()
 {
-  velocity_target += velocity_inc;
-  if (velocity_target > velocity_max)
+  target_velocity += velocity_inc;
+  if (target_velocity > velocity_max)
   {
     step_dir_controller.stop(MOTOR);
     Serial << "stopping motor!\n";
     delay(LOOP_DELAY*5);
 
-    velocity_target = -velocity_max;
+    target_velocity = -velocity_max;
   }
-  step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
-  Serial << "set velocity_target: " << velocity_target << "\n";
+  step_dir_controller.setTargetVelocityInHz(MOTOR,target_velocity);
+  Serial << "set target_velocity: " << target_velocity << "\n";
 
-  velocity_target = step_dir_controller.getVelocityTargetInHz(MOTOR);
+  target_velocity = step_dir_controller.getTargetVelocityInHz(MOTOR);
 
   do
   {
-    velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
-    Serial << "velocity_actual: " << velocity_actual << " velocity_target: " << velocity_target << "\n";
+    actual_velocity = step_dir_controller.getActualVelocityInHz(MOTOR);
+    Serial << "actual_velocity: " << actual_velocity << " target_velocity: " << target_velocity << "\n";
     delay(LOOP_DELAY);
   }
-  while (velocity_actual != velocity_target);
+  while (actual_velocity != target_velocity);
 
-  Serial << "velocity_actual == velocity_target == : " << velocity_actual << "!\n";
+  Serial << "actual_velocity == target_velocity == : " << actual_velocity << "!\n";
   Serial << "\n";
 }

@@ -67,7 +67,7 @@ void loop()
   acceleration_max = step_dir_controller.getAccelerationMaxUpperLimitInHzPerS(MOTOR);
   Serial << "acceleration_max_upper_limit: " << acceleration_max << "\n";
 
-  uint32_t acceleration_actual = step_dir_controller.getAccelerationActualInHzPerS(MOTOR);
+  uint32_t acceleration_actual = step_dir_controller.getActualAccelerationInHzPerS(MOTOR);
   Serial << "acceleration_actual: " << acceleration_actual << "\n";
 
   velocity_min = step_dir_controller.getVelocityMinInHz(MOTOR);
@@ -76,25 +76,25 @@ void loop()
   velocity_max = step_dir_controller.getVelocityMaxInHz(MOTOR);
   Serial << "velocity_max: " << velocity_max << "\n";
 
-  long velocity_target = -50000;
-  step_dir_controller.setVelocityTargetInHz(MOTOR,velocity_target);
-  Serial << "set velocity_target: " << velocity_target << "\n";
+  long target_velocity = -50000;
+  step_dir_controller.setTargetVelocityInHz(MOTOR,target_velocity);
+  Serial << "set target_velocity: " << target_velocity << "\n";
 
-  velocity_target = step_dir_controller.getVelocityTargetInHz(MOTOR);
-  Serial << "velocity_target: " << velocity_target << "\n";
+  target_velocity = step_dir_controller.getTargetVelocityInHz(MOTOR);
+  Serial << "target_velocity: " << target_velocity << "\n";
 
-  long velocity_actual = step_dir_controller.getVelocityActualInHz(MOTOR);
-  Serial << "velocity_actual: " << velocity_actual << "\n";
+  long actual_velocity = step_dir_controller.getActualVelocityInHz(MOTOR);
+  Serial << "actual_velocity: " << actual_velocity << "\n";
 
-  int32_t position_target = 12345;
-  step_dir_controller.setPositionTarget(MOTOR,position_target);
-  Serial << "set position_target: " << position_target << "\n";
+  int32_t target_position = 12345;
+  step_dir_controller.setTargetPosition(MOTOR,target_position);
+  Serial << "set target_position: " << target_position << "\n";
 
-  position_target = step_dir_controller.getPositionTarget(MOTOR);
-  Serial << "position_target: " << position_target << "\n";
+  target_position = step_dir_controller.getTargetPosition(MOTOR);
+  Serial << "target_position: " << target_position << "\n";
 
-  int32_t position_actual = step_dir_controller.getPositionActual(MOTOR);
-  Serial << "position_actual: " << position_actual << "\n";
+  int32_t actual_position = step_dir_controller.getActualPosition(MOTOR);
+  Serial << "actual_position: " << actual_position << "\n";
 
   TMC429::Status status = step_dir_controller.getStatus();
   Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";

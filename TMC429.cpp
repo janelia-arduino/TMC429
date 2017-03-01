@@ -160,13 +160,13 @@ uint32_t TMC429::getAccelerationMaxUpperLimitInHzPerS(const size_t motor)
   return e;
 }
 
-uint32_t TMC429::getAccelerationActualInHzPerS(const size_t motor)
+uint32_t TMC429::getActualAccelerationInHzPerS(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
     return 0;
   }
-  return convertAccelerationToHzPerS(motor,getAccelerationActual(motor));
+  return convertAccelerationToHzPerS(motor,getActualAcceleration(motor));
 }
 
 uint32_t TMC429::getVelocityMinInHz(const size_t motor)
@@ -187,35 +187,35 @@ uint32_t TMC429::getVelocityMaxInHz(const size_t motor)
   return convertVelocityToHz(motor,getVelocityMax(motor));
 }
 
-int32_t TMC429::getVelocityTargetInHz(const size_t motor)
+int32_t TMC429::getTargetVelocityInHz(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
     return 0;
   }
-  return convertVelocityToHz(motor,getVelocityTarget(motor));
+  return convertVelocityToHz(motor,getTargetVelocity(motor));
 }
 
-void TMC429::setVelocityTargetInHz(const size_t motor,
+void TMC429::setTargetVelocityInHz(const size_t motor,
                                    const int32_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
     return;
   }
-  setVelocityTarget(motor,convertVelocityFromHz(motor,velocity));
+  setTargetVelocity(motor,convertVelocityFromHz(motor,velocity));
 }
 
-int32_t TMC429::getVelocityActualInHz(const size_t motor)
+int32_t TMC429::getActualVelocityInHz(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
     return 0;
   }
-  return convertVelocityToHz(motor,getVelocityActual(motor));
+  return convertVelocityToHz(motor,getActualVelocity(motor));
 }
 
-int32_t TMC429::getPositionTarget(const size_t motor)
+int32_t TMC429::getTargetPosition(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -225,7 +225,7 @@ int32_t TMC429::getPositionTarget(const size_t motor)
   return unsignedToSigned(position_unsigned,X_BIT_COUNT);
 }
 
-void TMC429::setPositionTarget(const size_t motor,
+void TMC429::setTargetPosition(const size_t motor,
                                int32_t position)
 {
   if (motor >= MOTOR_COUNT)
@@ -235,7 +235,7 @@ void TMC429::setPositionTarget(const size_t motor,
   writeRegister(motor,ADDRESS_X_TARGET,position);
 }
 
-int32_t TMC429::getPositionActual(const size_t motor)
+int32_t TMC429::getActualPosition(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -245,7 +245,7 @@ int32_t TMC429::getPositionActual(const size_t motor)
   return unsignedToSigned(position_unsigned,X_BIT_COUNT);
 }
 
-void TMC429::setPositionActual(const size_t motor,
+void TMC429::setActualPosition(const size_t motor,
                                int32_t position)
 {
   if (motor >= MOTOR_COUNT)
@@ -262,7 +262,7 @@ void TMC429::stop(const size_t motor)
     return;
   }
   setMode(motor,VELOCITY_MODE);
-  setVelocityTarget(motor,0);
+  setTargetVelocity(motor,0);
 }
 
 void TMC429::stopAll()
@@ -676,19 +676,19 @@ void TMC429::setVelocityMax(const size_t motor,
   writeRegister(motor,ADDRESS_V_MAX,velocity);
 }
 
-int16_t TMC429::getVelocityTarget(const size_t motor)
+int16_t TMC429::getTargetVelocity(const size_t motor)
 {
   uint32_t velocity_unsigned = readRegister(motor,ADDRESS_V_TARGET);
   return unsignedToSigned(velocity_unsigned,V_BIT_COUNT);
 }
 
-void TMC429::setVelocityTarget(const size_t motor,
+void TMC429::setTargetVelocity(const size_t motor,
                                const int16_t velocity)
 {
   writeRegister(motor,ADDRESS_V_TARGET,velocity);
 }
 
-int16_t TMC429::getVelocityActual(const size_t motor)
+int16_t TMC429::getActualVelocity(const size_t motor)
 {
   uint32_t velocity_unsigned = readRegister(motor,ADDRESS_V_ACTUAL);
   return unsignedToSigned(velocity_unsigned,V_BIT_COUNT);
@@ -776,7 +776,7 @@ uint16_t TMC429::setAccelerationMax(const size_t motor,
   return a_max;
 }
 
-int16_t TMC429::getAccelerationActual(const size_t motor)
+int16_t TMC429::getActualAcceleration(const size_t motor)
 {
   uint32_t acceleration_unsigned = readRegister(motor,ADDRESS_A_ACTUAL);
   return unsignedToSigned(acceleration_unsigned,A_BIT_COUNT);
