@@ -31,26 +31,8 @@ void setup()
 
 void loop()
 {
-  step_dir_controller.setMode(MOTOR,TMC429::VELOCITY_MODE);
-  // step_dir_controller.setMode(MOTOR,TMC429::RAMP_MODE);
-
-  TMC429::Mode mode = step_dir_controller.getMode(MOTOR);
-  if (mode == TMC429::RAMP_MODE)
-  {
-    Serial << "mode: ramp_mode\n";
-  }
-  else if (mode == TMC429::SOFT_MODE)
-  {
-    Serial << "mode: soft_mode\n";
-  }
-  else if (mode == TMC429::VELOCITY_MODE)
-  {
-    Serial << "mode: velocity_mode\n";
-  }
-  else if (mode == TMC429::HOLD_MODE)
-  {
-    Serial << "mode: hold_mode\n";
-  }
+  step_dir_controller.setVelocityMode(MOTOR);
+  // step_dir_controller.setRampMode(MOTOR);
 
   uint32_t velocity_max_upper_limit = step_dir_controller.getVelocityMaxUpperLimitInHz();
   Serial << "velocity_max_upper_limit: " << velocity_max_upper_limit << "\n";
@@ -96,57 +78,73 @@ void loop()
   int32_t actual_position = step_dir_controller.getActualPosition(MOTOR);
   Serial << "actual_position: " << actual_position << "\n";
 
-  TMC429::Status status = step_dir_controller.getStatus();
-  Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
-  Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
-  Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
-  Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
-  Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
-  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
+  Serial << "at_target_position = " << step_dir_controller.atTargetPosition(MOTOR) << "\n";
+  Serial << "at_target_velocity = " << step_dir_controller.atTargetVelocity(MOTOR) << "\n";
 
-  step_dir_controller.disableLeftSwitchStop(MOTOR);
-  step_dir_controller.disableRightSwitchStop(MOTOR);
+  step_dir_controller.enableRightReferences();
   step_dir_controller.disableSoftStop(MOTOR);
-  step_dir_controller.setReferenceSwitchToRight(MOTOR);
-  TMC429::ReferenceConfiguration ref_conf = step_dir_controller.getReferenceConfiguration(MOTOR);
-  Serial << "ref_conf.disable_stop_l: " << ref_conf.disable_stop_l << "\n";
-  Serial << "ref_conf.disable_stop_r: " << ref_conf.disable_stop_r << "\n";
-  Serial << "ref_conf.soft_stop: " << ref_conf.soft_stop << "\n";
-  Serial << "ref_conf.ref_rnl: " << ref_conf.ref_rnl << "\n";
 
-  bool position_latched = step_dir_controller.positionLatched(MOTOR);
-  Serial << "position_latched: " << position_latched << "\n";
+  step_dir_controller.enableLeftSwitchStop(MOTOR);
+  step_dir_controller.enableRightSwitchStop(MOTOR);
+  step_dir_controller.setReferenceSwitchToLeft(MOTOR);
+  step_dir_controller.setSwitchesActiveLow();
+  Serial << "left_switch_active = " << step_dir_controller.leftSwitchActive(MOTOR) << "\n";
+  Serial << "right_switch_active = " << step_dir_controller.rightSwitchActive(MOTOR) << "\n";
+
+  bool latch_position_waiting = step_dir_controller.latchPositionWaiting(MOTOR);
+  Serial << "latch_position_waiting: " << latch_position_waiting << "\n";
+  if (!latch_position_waiting)
+  {
+    int32_t latch_position = step_dir_controller.getLatchPosition(MOTOR);
+    Serial << "latch_position: " << latch_position << "\n";
+    step_dir_controller.startLatchPositionWaiting(MOTOR);
+  }
 
   step_dir_controller.setPositionCompareMotor(MOTOR);
-  step_dir_controller.enableRightReferences();
-  TMC429::InterfaceConfiguration if_conf = step_dir_controller.getInterfaceConfiguration();
-  Serial << "if_conf.inv_ref: " << if_conf.inv_ref << "\n";
-  Serial << "if_conf.sdo_int: " << if_conf.sdo_int << "\n";
-  Serial << "if_conf.step_half: " << if_conf.step_half << "\n";
-  Serial << "if_conf.inv_stp: " << if_conf.inv_stp << "\n";
-  Serial << "if_conf.inv_dir: " << if_conf.inv_dir << "\n";
-  Serial << "if_conf.en_sd: " << if_conf.en_sd << "\n";
-  Serial << "if_conf.pos_comp_sel: " << if_conf.pos_comp_sel << "\n";
-  Serial << "if_conf.en_refr: " << if_conf.en_refr << "\n";
 
-  TMC429::SwitchState switch_state = step_dir_controller.getSwitchState();
-  Serial << "switch_state.r0: " << switch_state.r0 << "\n";
-  Serial << "switch_state.l0: " << switch_state.l0 << "\n";
-  Serial << "switch_state.r1: " << switch_state.r1 << "\n";
-  Serial << "switch_state.l1: " << switch_state.l1 << "\n";
-  Serial << "switch_state.r2: " << switch_state.r2 << "\n";
-  Serial << "switch_state.l2: " << switch_state.l2 << "\n";
+  // test private methods:
+  // TMC429::Status status = step_dir_controller.getStatus();
+  // Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
+  // Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
+  // Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
+  // Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
+  // Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
+  // Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
 
-  TMC429::ClockConfiguration clk_config = step_dir_controller.getClockConfiguration(MOTOR);
-  Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
-  Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
-  Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
+  // TMC429::ReferenceConfiguration ref_conf = step_dir_controller.getReferenceConfiguration(MOTOR);
+  // Serial << "ref_conf.disable_stop_l: " << ref_conf.disable_stop_l << "\n";
+  // Serial << "ref_conf.disable_stop_r: " << ref_conf.disable_stop_r << "\n";
+  // Serial << "ref_conf.soft_stop: " << ref_conf.soft_stop << "\n";
+  // Serial << "ref_conf.ref_rnl: " << ref_conf.ref_rnl << "\n";
 
-  double proportionality_factor = step_dir_controller.getProportionalityFactor(MOTOR);
-  Serial << "proportionality_factor: " << proportionality_factor << "\n";
+  // TMC429::InterfaceConfiguration if_conf = step_dir_controller.getInterfaceConfiguration();
+  // Serial << "if_conf.inv_ref: " << if_conf.inv_ref << "\n";
+  // Serial << "if_conf.sdo_int: " << if_conf.sdo_int << "\n";
+  // Serial << "if_conf.step_half: " << if_conf.step_half << "\n";
+  // Serial << "if_conf.inv_stp: " << if_conf.inv_stp << "\n";
+  // Serial << "if_conf.inv_dir: " << if_conf.inv_dir << "\n";
+  // Serial << "if_conf.en_sd: " << if_conf.en_sd << "\n";
+  // Serial << "if_conf.pos_comp_sel: " << if_conf.pos_comp_sel << "\n";
+  // Serial << "if_conf.en_refr: " << if_conf.en_refr << "\n";
 
-  double step_time = step_dir_controller.getStepTimeInMicroS();
-  Serial << "step_time: " << step_time << "\n";
+  // TMC429::SwitchState switch_state = step_dir_controller.getSwitchState();
+  // Serial << "switch_state.r0: " << switch_state.r0 << "\n";
+  // Serial << "switch_state.l0: " << switch_state.l0 << "\n";
+  // Serial << "switch_state.r1: " << switch_state.r1 << "\n";
+  // Serial << "switch_state.l1: " << switch_state.l1 << "\n";
+  // Serial << "switch_state.r2: " << switch_state.r2 << "\n";
+  // Serial << "switch_state.l2: " << switch_state.l2 << "\n";
+
+  // TMC429::ClockConfiguration clk_config = step_dir_controller.getClockConfiguration(MOTOR);
+  // Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
+  // Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
+  // Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
+
+  // double proportionality_factor = step_dir_controller.getProportionalityFactor(MOTOR);
+  // Serial << "proportionality_factor: " << proportionality_factor << "\n";
+
+  // double step_time = step_dir_controller.getStepTimeInMicroS();
+  // Serial << "step_time: " << step_time << "\n";
 
   Serial << "\n";
   delay(LOOP_DELAY);

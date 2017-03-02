@@ -57,45 +57,19 @@ void TMC429::setStepDirOutput()
 //   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 // }
 
-TMC429::Mode TMC429::getMode(const size_t motor)
+void TMC429::setRampMode(const size_t motor)
 {
-  if (motor >= MOTOR_COUNT)
-  {
-    return RAMP_MODE;
-  }
-
-  RefConfMode ref_conf_mode;
-  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
-  switch (ref_conf_mode.fields.mode)
-  {
-    case RAMP_MODE:
-      return RAMP_MODE;
-      break;
-    case SOFT_MODE:
-      return SOFT_MODE;
-      break;
-    case VELOCITY_MODE:
-      return VELOCITY_MODE;
-      break;
-    case HOLD_MODE:
-      return HOLD_MODE;
-      break;
-  }
-  return RAMP_MODE;
+  setMode(motor,RAMP_MODE);
 }
 
-void TMC429::setMode(const size_t motor,
-                     const Mode mode)
+void TMC429::setSoftMode(const size_t motor)
 {
-  if (motor >= MOTOR_COUNT)
-  {
-    return;
-  }
+  setMode(motor,SOFT_MODE);
+}
 
-  RefConfMode ref_conf_mode;
-  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
-  ref_conf_mode.fields.mode = (uint8_t)mode;
-  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+void TMC429::setVelocityMode(const size_t motor)
+{
+  setMode(motor,VELOCITY_MODE);
 }
 
 uint32_t TMC429::getVelocityMaxUpperLimitInHz()
@@ -295,20 +269,52 @@ void TMC429::stopAll()
   }
 }
 
-TMC429::Status TMC429::getStatus()
+void TMC429::setSwitchesActiveLow()
 {
-  getVersion();
-  return status_;
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
-TMC429::ReferenceConfiguration TMC429::getReferenceConfiguration(const size_t motor)
+void TMC429::setSwitchesActiveHigh()
 {
-  RefConfMode ref_conf_mode;
-  if (motor < MOTOR_COUNT)
-  {
-    ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
-  }
-  return ref_conf_mode.fields.ref_conf;
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::enableInverseStepPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_stp = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableInverseStepPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_stp = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::enableInverseDirPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_dir = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableInverseDirPolarity()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_dir = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
 void TMC429::enableLeftSwitchStop(const size_t motor)
@@ -335,6 +341,33 @@ void TMC429::disableLeftSwitchStop(const size_t motor)
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
 }
 
+bool TMC429::leftSwitchActive(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return false;
+  }
+  SwitchState switch_state = getSwitchState();
+  switch (motor)
+  {
+    case 0:
+    {
+      return switch_state.l0;
+      break;
+    }
+    case 1:
+    {
+      return switch_state.l1;
+      break;
+    }
+    case 2:
+    {
+      return switch_state.l2;
+      break;
+    }
+  }
+}
+
 void TMC429::enableRightSwitchStop(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -357,6 +390,49 @@ void TMC429::disableRightSwitchStop(const size_t motor)
   ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
   ref_conf_mode.fields.ref_conf.disable_stop_r = 1;
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+bool TMC429::rightSwitchActive(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return false;
+  }
+  SwitchState switch_state = getSwitchState();
+  switch (motor)
+  {
+    case 0:
+    {
+      return switch_state.r0;
+      break;
+    }
+    case 1:
+    {
+      return switch_state.r1;
+      break;
+    }
+    case 2:
+    {
+      return switch_state.r2;
+      break;
+    }
+  }
+}
+
+void TMC429::enableRightReferences()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableRightReferences()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
 void TMC429::enableSoftStop(const size_t motor)
@@ -407,7 +483,16 @@ void TMC429::setReferenceSwitchToRight(const size_t motor)
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
 }
 
-bool TMC429::positionLatched(const size_t motor)
+void TMC429::startLatchPositionWaiting(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  writeRegister(motor,ADDRESS_X_LATCHED,0);
+}
+
+bool TMC429::latchPositionWaiting(const size_t motor)
 {
   RefConfMode ref_conf_mode;
   if (motor < MOTOR_COUNT)
@@ -417,59 +502,14 @@ bool TMC429::positionLatched(const size_t motor)
   return ref_conf_mode.fields.lp;
 }
 
-TMC429::InterfaceConfiguration TMC429::getInterfaceConfiguration()
+int32_t TMC429::getLatchPosition(const size_t motor)
 {
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  return if_conf.fields.if_conf;
-}
-
-void TMC429::setReferenceActiveLow()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_ref = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::setReferenceActiveHigh()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_ref = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::enableInverseStepPolarity()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_stp = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::disableInverseStepPolarity()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_stp = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::enableInverseDirPolarity()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_dir = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::disableInverseDirPolarity()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_dir = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0;
+  }
+  uint32_t position_unsigned = readRegister(motor,ADDRESS_X_LATCHED);
+  return unsignedToSigned(position_unsigned,X_BIT_COUNT);
 }
 
 void TMC429::setPositionCompareMotor(const size_t motor)
@@ -482,58 +522,6 @@ void TMC429::setPositionCompareMotor(const size_t motor)
   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
   if_conf.fields.if_conf.pos_comp_sel = motor;
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::enableRightReferences()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_refr = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::disableRightReferences()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_refr = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-TMC429::SwitchState TMC429::getSwitchState()
-{
-  SwState switch_state;
-  switch_state.uint32 = readRegister(SMDA_COMMON,ADDRESS_SWITCHES);
-  return switch_state.fields.switch_state;
-}
-
-TMC429::ClockConfiguration TMC429::getClockConfiguration(const size_t motor)
-{
-  ClkConfig clk_config;
-  if (motor < MOTOR_COUNT)
-  {
-    clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
-  }
-  return clk_config.fields.clk_config;
-}
-
-double TMC429::getProportionalityFactor(const size_t motor)
-{
-  if (motor >= MOTOR_COUNT)
-  {
-    return 0.0;
-  }
-  PropFactor prop_factor;
-  prop_factor.uint32 = readRegister(motor,ADDRESS_PROP_FACTOR);
-  int pm = prop_factor.fields.pmul;
-  int pd = prop_factor.fields.pdiv;
-  return ((double)(pm)) / ((double)(1 << (pd + 3)));
-}
-
-double TMC429::getStepTimeInMicroS()
-{
-  uint8_t step_div = getStepDiv();
-  return stepDivToStepTime(step_div);
 }
 
 // private
@@ -674,6 +662,106 @@ void TMC429::setOptimalPulseDiv(const size_t motor,
   clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
   clk_config.fields.clk_config.pulse_div = pulse_div;
   writeRegister(motor,ADDRESS_CLOCK_CONFIGURATION,clk_config.uint32);
+}
+
+TMC429::Mode TMC429::getMode(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return RAMP_MODE;
+  }
+
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  switch (ref_conf_mode.fields.mode)
+  {
+    case RAMP_MODE:
+      return RAMP_MODE;
+      break;
+    case SOFT_MODE:
+      return SOFT_MODE;
+      break;
+    case VELOCITY_MODE:
+      return VELOCITY_MODE;
+      break;
+    case HOLD_MODE:
+      return HOLD_MODE;
+      break;
+  }
+  return RAMP_MODE;
+}
+
+void TMC429::setMode(const size_t motor,
+                     const Mode mode)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  ref_conf_mode.fields.mode = (uint8_t)mode;
+  writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+TMC429::Status TMC429::getStatus()
+{
+  getVersion();
+  return status_;
+}
+
+TMC429::ReferenceConfiguration TMC429::getReferenceConfiguration(const size_t motor)
+{
+  RefConfMode ref_conf_mode;
+  if (motor < MOTOR_COUNT)
+  {
+    ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  }
+  return ref_conf_mode.fields.ref_conf;
+}
+
+TMC429::InterfaceConfiguration TMC429::getInterfaceConfiguration()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  return if_conf.fields.if_conf;
+}
+
+TMC429::SwitchState TMC429::getSwitchState()
+{
+  SwState switch_state;
+  switch_state.uint32 = readRegister(SMDA_COMMON,ADDRESS_SWITCHES);
+  return switch_state.fields.switch_state;
+}
+
+TMC429::ClockConfiguration TMC429::getClockConfiguration(const size_t motor)
+{
+  ClkConfig clk_config;
+  if (motor < MOTOR_COUNT)
+  {
+    clk_config.uint32 = readRegister(motor,ADDRESS_CLOCK_CONFIGURATION);
+  }
+  return clk_config.fields.clk_config;
+}
+
+double TMC429::getProportionalityFactor(const size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return 0.0;
+  }
+  PropFactor prop_factor;
+  prop_factor.uint32 = readRegister(motor,ADDRESS_PROP_FACTOR);
+  int pm = prop_factor.fields.pmul;
+  int pd = prop_factor.fields.pdiv;
+  return ((double)(pm)) / ((double)(1 << (pd + 3)));
+}
+
+double TMC429::getStepTimeInMicroS()
+{
+  uint8_t step_div = getStepDiv();
+  return stepDivToStepTime(step_div);
 }
 
 uint16_t TMC429::getVelocityMin(const size_t motor)

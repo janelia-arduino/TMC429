@@ -42,7 +42,7 @@ void setup()
   velocity_inc = microsteps_per_rev/INC_PER_REV;
   for (int motor=0; motor<MOTOR_COUNT; ++motor)
   {
-    step_dir_controller.setMode(motor,TMC429::VELOCITY_MODE);
+    step_dir_controller.setVelocityMode(motor);
     step_dir_controller.setLimitsInHz(motor,VELOCITY_MIN,velocity_max,ACCELERATION_MAX);
     step_dir_controller.disableLeftSwitchStop(motor);
     step_dir_controller.disableRightSwitchStop(motor);

@@ -29,17 +29,9 @@ public:
   void setStepDirOutput();
   // void setSpiOutput();
 
-  enum Mode
-    {
-      RAMP_MODE=0b00,
-      SOFT_MODE=0b01,
-      VELOCITY_MODE=0b10,
-      HOLD_MODE=0b11,
-    };
-
-  Mode getMode(const size_t motor);
-  void setMode(const size_t motor,
-               const Mode mode);
+  void setRampMode(const size_t motor);
+  void setSoftMode(const size_t motor);
+  void setVelocityMode(const size_t motor);
 
   uint32_t getVelocityMaxUpperLimitInHz();
 
@@ -75,6 +67,47 @@ public:
   void stop(const size_t motor);
   void stopAll();
 
+  void setSwitchesActiveLow();
+  void setSwitchesActiveHigh();
+
+  void enableInverseStepPolarity();
+  void disableInverseStepPolarity();
+
+  void enableInverseDirPolarity();
+  void disableInverseDirPolarity();
+
+  void enableLeftSwitchStop(const size_t motor);
+  void disableLeftSwitchStop(const size_t motor);
+  bool leftSwitchActive(const size_t motor);
+
+  void enableRightSwitchStop(const size_t motor);
+  void disableRightSwitchStop(const size_t motor);
+  bool rightSwitchActive(const size_t motor);
+
+  void enableRightReferences();
+  void disableRightReferences();
+
+  void enableSoftStop(const size_t motor);
+  void disableSoftStop(const size_t motor);
+
+  void setReferenceSwitchToLeft(const size_t motor);
+  void setReferenceSwitchToRight(const size_t motor);
+
+  void startLatchPositionWaiting(const size_t motor);
+  bool latchPositionWaiting(const size_t motor);
+  int32_t getLatchPosition(const size_t motor);
+
+  void setPositionCompareMotor(const size_t motor);
+
+private:
+  enum Mode
+    {
+      RAMP_MODE=0b00,
+      SOFT_MODE=0b01,
+      VELOCITY_MODE=0b10,
+      HOLD_MODE=0b11,
+    };
+
   struct Status
   {
     uint8_t at_target_position_0 : 1;
@@ -87,8 +120,6 @@ public:
     uint8_t interrupt : 1;
   };
 
-  Status getStatus();
-
   struct ReferenceConfiguration
   {
     uint8_t disable_stop_l : 1;
@@ -97,22 +128,6 @@ public:
     uint8_t ref_rnl : 1;
     uint8_t space : 4;
   };
-
-  ReferenceConfiguration getReferenceConfiguration(const size_t motor);
-
-  void enableLeftSwitchStop(const size_t motor);
-  void disableLeftSwitchStop(const size_t motor);
-
-  void enableRightSwitchStop(const size_t motor);
-  void disableRightSwitchStop(const size_t motor);
-
-  void enableSoftStop(const size_t motor);
-  void disableSoftStop(const size_t motor);
-
-  void setReferenceSwitchToLeft(const size_t motor);
-  void setReferenceSwitchToRight(const size_t motor);
-
-  bool positionLatched(const size_t motor);
 
   struct InterfaceConfiguration
   {
@@ -127,22 +142,6 @@ public:
     uint16_t space : 7;
   };
 
-  InterfaceConfiguration getInterfaceConfiguration();
-
-  void setReferenceActiveLow();
-  void setReferenceActiveHigh();
-
-  void enableInverseStepPolarity();
-  void disableInverseStepPolarity();
-
-  void enableInverseDirPolarity();
-  void disableInverseDirPolarity();
-
-  void setPositionCompareMotor(const size_t motor);
-
-  void enableRightReferences();
-  void disableRightReferences();
-
   struct SwitchState
   {
     uint8_t r0 : 1;
@@ -154,8 +153,6 @@ public:
     uint8_t space : 2;
   };
 
-  SwitchState getSwitchState();
-
   struct ClockConfiguration
   {
     uint16_t usrs : 3;
@@ -164,12 +161,6 @@ public:
     uint16_t pulse_div : 4;
   };
 
-  ClockConfiguration getClockConfiguration(const size_t motor);
-  double getProportionalityFactor(const size_t motor);
-
-  double getStepTimeInMicroS();
-
-private:
   // SPISettings
   const static uint32_t SPI_CLOCK = 1000000;
   const static uint8_t SPI_BIT_ORDER = MSBFIRST;
@@ -364,6 +355,23 @@ private:
 
   void setOptimalPulseDiv(const size_t motor,
                           const uint32_t velocity_max_hz);
+
+  Mode getMode(const size_t motor);
+  void setMode(const size_t motor,
+               const Mode mode);
+
+  Status getStatus();
+
+  ReferenceConfiguration getReferenceConfiguration(const size_t motor);
+
+  InterfaceConfiguration getInterfaceConfiguration();
+
+  SwitchState getSwitchState();
+
+  ClockConfiguration getClockConfiguration(const size_t motor);
+  double getProportionalityFactor(const size_t motor);
+
+  double getStepTimeInMicroS();
 
   uint16_t getVelocityMin(const size_t motor);
   void setVelocityMin(const size_t motor,
