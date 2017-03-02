@@ -368,6 +368,22 @@ bool TMC429::leftSwitchActive(const size_t motor)
   }
 }
 
+void TMC429::enableRightSwitches()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::disableRightSwitches()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_refr = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
 void TMC429::enableRightSwitchStop(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -419,23 +435,7 @@ bool TMC429::rightSwitchActive(const size_t motor)
   }
 }
 
-void TMC429::enableRightReferences()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_refr = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::disableRightReferences()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_refr = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::enableSoftStop(const size_t motor)
+void TMC429::enableSwitchSoftStop(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -447,7 +447,7 @@ void TMC429::enableSoftStop(const size_t motor)
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
 }
 
-void TMC429::disableSoftStop(const size_t motor)
+void TMC429::disableSwitchSoftStop(const size_t motor)
 {
   if (motor >= MOTOR_COUNT)
   {

@@ -80,15 +80,15 @@ public:
   void disableLeftSwitchStop(const size_t motor);
   bool leftSwitchActive(const size_t motor);
 
+  void enableRightSwitches();
+  void disableRightSwitches();
+
   void enableRightSwitchStop(const size_t motor);
   void disableRightSwitchStop(const size_t motor);
   bool rightSwitchActive(const size_t motor);
 
-  void enableRightReferences();
-  void disableRightReferences();
-
-  void enableSoftStop(const size_t motor);
-  void disableSoftStop(const size_t motor);
+  void enableSwitchSoftStop(const size_t motor);
+  void disableSwitchSoftStop(const size_t motor);
 
   void setReferenceSwitchToLeft(const size_t motor);
   void setReferenceSwitchToRight(const size_t motor);
