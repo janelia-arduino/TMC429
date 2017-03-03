@@ -67,14 +67,14 @@ public:
   void stop(const size_t motor);
   void stopAll();
 
-  void setSwitchesActiveLow();
-  void setSwitchesActiveHigh();
-
   void enableInverseStepPolarity();
   void disableInverseStepPolarity();
 
   void enableInverseDirPolarity();
   void disableInverseDirPolarity();
+
+  void setSwitchesActiveLow();
+  void setSwitchesActiveHigh();
 
   void enableLeftSwitchStop(const size_t motor);
   void disableLeftSwitchStop(const size_t motor);

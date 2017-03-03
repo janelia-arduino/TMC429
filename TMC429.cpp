@@ -269,22 +269,6 @@ void TMC429::stopAll()
   }
 }
 
-void TMC429::setSwitchesActiveLow()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_ref = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-void TMC429::setSwitchesActiveHigh()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.inv_ref = 0;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
 void TMC429::enableInverseStepPolarity()
 {
   IfConf if_conf;
@@ -314,6 +298,22 @@ void TMC429::disableInverseDirPolarity()
   IfConf if_conf;
   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
   if_conf.fields.if_conf.inv_dir = 0;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setSwitchesActiveLow()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+void TMC429::setSwitchesActiveHigh()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.inv_ref = 0;
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
