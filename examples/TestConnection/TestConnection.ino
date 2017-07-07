@@ -3,7 +3,7 @@
 #include "Streaming.h"
 #include "TMC429.h"
 
-const int BAUDRATE = 115200;
+const long BAUDRATE = 115200;
 const int LOOP_DELAY = 2000;
 const int CS_PIN = 10;
 const int CLOCK_FREQUENCY_MHZ = 16;
