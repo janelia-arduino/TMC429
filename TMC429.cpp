@@ -366,6 +366,7 @@ bool TMC429::leftSwitchActive(const size_t motor)
       break;
     }
   }
+  return false;
 }
 
 void TMC429::enableRightSwitches()
@@ -433,6 +434,7 @@ bool TMC429::rightSwitchActive(const size_t motor)
       break;
     }
   }
+  return false;
 }
 
 void TMC429::enableSwitchSoftStop(const size_t motor)
@@ -495,6 +497,7 @@ void TMC429::startLatchPositionWaiting(const size_t motor)
 bool TMC429::latchPositionWaiting(const size_t motor)
 {
   RefConfMode ref_conf_mode;
+  ref_conf_mode.fields.lp = false;
   if (motor < MOTOR_COUNT)
   {
     ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
