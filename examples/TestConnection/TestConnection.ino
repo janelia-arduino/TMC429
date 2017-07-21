@@ -102,15 +102,15 @@ void loop()
 
   tmc429.setPositionCompareMotor(MOTOR);
 
-  // test private methods:
-  // TMC429::Status status = tmc429.getStatus();
-  // Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
-  // Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
-  // Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
-  // Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
-  // Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
-  // Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
+  TMC429::Status status = tmc429.getStatus();
+  Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
+  Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
+  Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
+  Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
+  Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
+  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
 
+  // test private methods:
   // TMC429::ReferenceConfiguration ref_conf = tmc429.getReferenceConfiguration(MOTOR);
   // Serial << "ref_conf.disable_stop_l: " << ref_conf.disable_stop_l << "\n";
   // Serial << "ref_conf.disable_stop_r: " << ref_conf.disable_stop_r << "\n";

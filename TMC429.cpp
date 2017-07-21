@@ -527,6 +527,12 @@ void TMC429::setPositionCompareMotor(const size_t motor)
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
+TMC429::Status TMC429::getStatus()
+{
+  getVersion();
+  return status_;
+}
+
 // private
 uint32_t TMC429::readRegister(const uint8_t smda,
                               const uint8_t address)
@@ -706,12 +712,6 @@ void TMC429::setMode(const size_t motor,
   ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
   ref_conf_mode.fields.mode = (uint8_t)mode;
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
-}
-
-TMC429::Status TMC429::getStatus()
-{
-  getVersion();
-  return status_;
 }
 
 TMC429::ReferenceConfiguration TMC429::getReferenceConfiguration(const size_t motor)

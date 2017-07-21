@@ -99,15 +99,6 @@ public:
 
   void setPositionCompareMotor(const size_t motor);
 
-private:
-  enum Mode
-    {
-      RAMP_MODE=0b00,
-      SOFT_MODE=0b01,
-      VELOCITY_MODE=0b10,
-      HOLD_MODE=0b11,
-    };
-
   struct Status
   {
     uint8_t at_target_position_0 : 1;
@@ -119,6 +110,16 @@ private:
     uint8_t cdgw : 1;
     uint8_t interrupt : 1;
   };
+  Status getStatus();
+
+private:
+  enum Mode
+    {
+      RAMP_MODE=0b00,
+      SOFT_MODE=0b01,
+      VELOCITY_MODE=0b10,
+      HOLD_MODE=0b11,
+    };
 
   struct ReferenceConfiguration
   {
@@ -359,8 +360,6 @@ private:
   Mode getMode(const size_t motor);
   void setMode(const size_t motor,
                const Mode mode);
-
-  Status getStatus();
 
   ReferenceConfiguration getReferenceConfiguration(const size_t motor);
 
