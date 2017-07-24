@@ -22,10 +22,10 @@ void setup()
   uint32_t version = tmc429.getVersion();
   Serial << "version: " << _HEX(version) << "\n";
 
-  bool check_version = tmc429.checkVersion();
-  Serial << "check_version: " << check_version << "\n";
+  bool communicating = tmc429.communicating();
+  Serial << "communicating: " << communicating << "\n";
 
-  tmc429.setStepDirOutput();
+  tmc429.initialize();
 
 }
 

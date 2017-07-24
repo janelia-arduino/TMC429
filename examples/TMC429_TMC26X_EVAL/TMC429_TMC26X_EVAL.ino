@@ -32,10 +32,10 @@ void setup()
 
   step_dir_controller.setup(CS_PIN_429,CLOCK_FREQUENCY_MHZ);
 
-  bool check_version = step_dir_controller.checkVersion();
-  Serial << "check_version: " << check_version << "\n";
+  bool communicating = step_dir_controller.communicating();
+  Serial << "communicating: " << communicating << "\n";
 
-  step_dir_controller.setStepDirOutput();
+  step_dir_controller.initialize();
 
   const int microsteps_per_rev = STEPS_PER_REV*MICROSTEPS_PER_STEP;
   velocity_max = microsteps_per_rev*REVS_PER_SEC_MAX;

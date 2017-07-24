@@ -23,11 +23,10 @@ public:
   void setup(const size_t cs_pin,
              const uint8_t clock_frequency_mhz);
 
+  bool communicating();
   uint32_t getVersion();
-  bool checkVersion();
 
-  void setStepDirOutput();
-  // void setSpiOutput();
+  void initialize();
 
   void setRampMode(const size_t motor);
   void setSoftMode(const size_t motor);
@@ -107,7 +106,7 @@ public:
     uint8_t switch_left_1 : 1;
     uint8_t at_target_position_2 : 1;
     uint8_t switch_left_2 : 1;
-    uint8_t cdgw : 1;
+    uint8_t cover_datagram_waiting : 1;
     uint8_t interrupt : 1;
   };
   Status getStatus();
@@ -332,6 +331,9 @@ private:
   };
 
   size_t cs_pin_;
+
+  void setStepDirOutput();
+  // void setSpiOutput();
 
   uint32_t readRegister(const uint8_t smda,
                         const uint8_t address);

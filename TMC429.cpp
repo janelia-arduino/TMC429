@@ -31,31 +31,20 @@ void TMC429::setup(const size_t cs_pin,
   stopAll();
 }
 
+bool TMC429::communicating()
+{
+  return (getVersion() == VERSION);
+}
+
 uint32_t TMC429::getVersion()
 {
   return readRegister(SMDA_COMMON,ADDRESS_TYPE_VERSION_429);
 }
 
-bool TMC429::checkVersion()
+void TMC429::initialize()
 {
-  return (getVersion() == VERSION);
+  setStepDirOutput();
 }
-
-void TMC429::setStepDirOutput()
-{
-  IfConf if_conf;
-  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-  if_conf.fields.if_conf.en_sd = 1;
-  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-}
-
-// void TMC429::setSpiOutput()
-// {
-//   IfConf if_conf;
-//   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
-//   if_conf.fields.if_conf.en_sd = 0;
-//   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
-// }
 
 void TMC429::setRampMode(const size_t motor)
 {
@@ -534,6 +523,22 @@ TMC429::Status TMC429::getStatus()
 }
 
 // private
+void TMC429::setStepDirOutput()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  if_conf.fields.if_conf.en_sd = 1;
+  writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+}
+
+// void TMC429::setSpiOutput()
+// {
+//   IfConf if_conf;
+//   if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+//   if_conf.fields.if_conf.en_sd = 0;
+//   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
+// }
+
 uint32_t TMC429::readRegister(const uint8_t smda,
                               const uint8_t address)
 {
@@ -947,4 +952,3 @@ void TMC429::setOptimalPropFactor(const size_t motor,
   prop_factor.fields.pdiv = pd;
   writeRegister(motor,ADDRESS_PROP_FACTOR,prop_factor.uint32);
 }
-
