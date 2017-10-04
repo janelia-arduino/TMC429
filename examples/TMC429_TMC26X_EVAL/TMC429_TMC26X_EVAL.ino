@@ -1,8 +1,8 @@
-#include "Arduino.h"
-#include "SPI.h"
-#include "Streaming.h"
-#include "TMC429.h"
-#include "TMC26X.h"
+#include <Arduino.h>
+#include <SPI.h>
+#include <Streaming.h>
+#include <TMC429.h>
+#include <TMC26X.h>
 
 
 const long BAUDRATE = 115200;
