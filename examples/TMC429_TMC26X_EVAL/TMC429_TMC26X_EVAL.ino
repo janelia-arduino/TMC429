@@ -5,7 +5,7 @@
 #include <TMC26X.h>
 
 
-const long BAUDRATE = 115200;
+const long BAUD = 115200;
 const int LOOP_DELAY = 1000;
 const int CS_PIN_429 = 10;
 const int CLOCK_FREQUENCY_MHZ = 16;
@@ -28,7 +28,7 @@ long target_velocity, actual_velocity;
 void setup()
 {
   // Setup serial communications
-  Serial.begin(BAUDRATE);
+  Serial.begin(BAUD);
 
   step_dir_controller.setup(CS_PIN_429,CLOCK_FREQUENCY_MHZ);
 
