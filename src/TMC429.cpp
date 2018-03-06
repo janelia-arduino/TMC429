@@ -574,7 +574,7 @@ TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram datagram_write)
   {
     uint8_t byte_write = (datagram_write.uint32 >> (8*i)) & 0xff;
     uint8_t byte_read = SPI.transfer(byte_write);
-    datagram_read.uint32 |= byte_read << (8*i);
+    datagram_read.uint32 |= ((uint32_t)byte_read) << (8*i);
   }
   digitalWrite(cs_pin_,HIGH);
   SPI.endTransaction();
