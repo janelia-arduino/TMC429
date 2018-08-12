@@ -2,7 +2,7 @@
 // TMC429.cpp
 //
 // Authors:
-// Peter Polidoro polidorop@janelia.hhmi.org
+// Peter Polidoro peterpolidoro@gmail.com
 // ----------------------------------------------------------------------------
 #include "TMC429.h"
 

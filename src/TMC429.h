@@ -2,7 +2,7 @@
 // TMC429.h
 //
 // Authors:
-// Peter Polidoro polidorop@janelia.hhmi.org
+// Peter Polidoro peterpolidoro@gmail.com
 // ----------------------------------------------------------------------------
 #ifndef TMC429_H
 #define TMC429_H
