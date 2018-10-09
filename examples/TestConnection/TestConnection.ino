@@ -6,7 +6,7 @@
 
 const long BAUD = 115200;
 const int LOOP_DELAY = 2000;
-const int CS_PIN = 10;
+const int CHIP_SELECT_PIN = 10;
 const int CLOCK_FREQUENCY_MHZ = 16;
 const int MOTOR = 0;
 
@@ -18,7 +18,7 @@ void setup()
   // Setup serial communications
   Serial.begin(BAUD);
 
-  tmc429.setup(CS_PIN,CLOCK_FREQUENCY_MHZ);
+  tmc429.setup(CHIP_SELECT_PIN,CLOCK_FREQUENCY_MHZ);
 
   uint32_t version = tmc429.getVersion();
   Serial << "version: " << _HEX(version) << "\n";

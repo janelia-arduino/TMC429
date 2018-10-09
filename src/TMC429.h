@@ -13,7 +13,7 @@
 class TMC429
 {
 public:
-  void setup(const size_t cs_pin,
+  void setup(const size_t chip_select_pin,
              const uint8_t clock_frequency_mhz);
 
   bool communicating();
@@ -178,6 +178,9 @@ private:
   uint8_t pulse_div_[MOTOR_COUNT];
   uint8_t ramp_div_[MOTOR_COUNT];
 
+  // Datagrams
+  const static uint8_t DATAGRAM_SIZE = 4;
+
   // MOSI Datagrams
   union MosiDatagram
   {
@@ -323,7 +326,7 @@ private:
     uint32_t uint32;
   };
 
-  size_t cs_pin_;
+  size_t chip_select_pin_;
 
   void setStepDirOutput();
   // void setSpiOutput();
@@ -333,7 +336,7 @@ private:
   void writeRegister(const uint8_t smda,
                      const uint8_t address,
                      const uint32_t data);
-  MisoDatagram writeRead(const MosiDatagram datagram_write);
+  MisoDatagram writeRead(const MosiDatagram mosi_datagram);
 
   int32_t unsignedToSigned(uint32_t input_value, uint8_t num_bits);
 
@@ -401,6 +404,10 @@ private:
   void setOptimalPropFactor(const size_t motor,
                             const uint16_t acceleration_max);
 
+  void enableClockSelect();
+  void disableClockSelect();
+  void spiBeginTransaction();
+  void spiEndTransaction();
 };
 
 #endif

@@ -7,10 +7,10 @@
 
 const long BAUD = 115200;
 const int LOOP_DELAY = 1000;
-const int CS_PIN_429 = 10;
+const int CHIP_SELECT_PIN_429 = 10;
 const int CLOCK_FREQUENCY_MHZ = 16;
 const int MOTOR_COUNT = 3;
-const int CS_PIN_26X[MOTOR_COUNT] = {9,8,7};
+const int CHIP_SELECT_PIN_26X[MOTOR_COUNT] = {9,8,7};
 const int CURRENT_SCALE_PERCENT = 18;
 const int STEPS_PER_REV = 200;
 const int MICROSTEPS_PER_STEP = 256;
@@ -30,7 +30,7 @@ void setup()
   // Setup serial communications
   Serial.begin(BAUD);
 
-  step_dir_controller.setup(CS_PIN_429,CLOCK_FREQUENCY_MHZ);
+  step_dir_controller.setup(CHIP_SELECT_PIN_429,CLOCK_FREQUENCY_MHZ);
 
   bool communicating = step_dir_controller.communicating();
   Serial << "communicating: " << communicating << "\n";
@@ -47,7 +47,7 @@ void setup()
     step_dir_controller.disableLeftSwitchStop(motor);
     step_dir_controller.disableRightSwitchStop(motor);
 
-    stepper_drivers[motor].setup(CS_PIN_26X[motor]);
+    stepper_drivers[motor].setup(CHIP_SELECT_PIN_26X[motor]);
     stepper_drivers[motor].setStepDirInput();
     stepper_drivers[motor].setDefaultChopperConfig();
     stepper_drivers[motor].disableCoolStep();

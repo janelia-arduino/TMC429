@@ -7,13 +7,13 @@
 #include "TMC429.h"
 
 
-void TMC429::setup(const size_t cs_pin,
+void TMC429::setup(const size_t chip_select_pin,
                    const uint8_t clock_frequency_mhz)
 {
-  cs_pin_ = cs_pin;
+  chip_select_pin_ = chip_select_pin;
 
-  pinMode(cs_pin_,OUTPUT);
-  digitalWrite(cs_pin_,HIGH);
+  pinMode(chip_select_pin_,OUTPUT);
+  digitalWrite(chip_select_pin_,HIGH);
 
   specifyClockFrequencyInMHz(clock_frequency_mhz);
 
@@ -541,47 +541,45 @@ void TMC429::setStepDirOutput()
 uint32_t TMC429::readRegister(const uint8_t smda,
                               const uint8_t address)
 {
-  MosiDatagram datagram_write;
-  datagram_write.fields.rrs = RRS_REGISTER;
-  datagram_write.fields.address = address;
-  datagram_write.fields.smda = smda;
-  datagram_write.fields.rw = RW_READ;
-  datagram_write.fields.data = 0;
-  MisoDatagram datagram_read = writeRead(datagram_write);
-  return datagram_read.fields.data;
+  MosiDatagram mosi_datagram;
+  mosi_datagram.fields.rrs = RRS_REGISTER;
+  mosi_datagram.fields.address = address;
+  mosi_datagram.fields.smda = smda;
+  mosi_datagram.fields.rw = RW_READ;
+  mosi_datagram.fields.data = 0;
+  MisoDatagram miso_datagram = writeRead(mosi_datagram);
+  return miso_datagram.fields.data;
 }
 
 void TMC429::writeRegister(const uint8_t smda,
                            const uint8_t address,
                            const uint32_t data)
 {
-  MosiDatagram datagram_write;
-  datagram_write.fields.rrs = RRS_REGISTER;
-  datagram_write.fields.address = address;
-  datagram_write.fields.smda = smda;
-  datagram_write.fields.rw = RW_WRITE;
-  datagram_write.fields.data = data;
-  writeRead(datagram_write);
+  MosiDatagram mosi_datagram;
+  mosi_datagram.fields.rrs = RRS_REGISTER;
+  mosi_datagram.fields.address = address;
+  mosi_datagram.fields.smda = smda;
+  mosi_datagram.fields.rw = RW_WRITE;
+  mosi_datagram.fields.data = data;
+  writeRead(mosi_datagram);
 }
 
-TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram datagram_write)
+TMC429::MisoDatagram TMC429::writeRead(const MosiDatagram mosi_datagram)
 {
-  MisoDatagram datagram_read;
-  datagram_read.uint32 = 0x0;
-  SPI.beginTransaction(SPISettings(SPI_CLOCK,SPI_BIT_ORDER,SPI_MODE));
-  digitalWrite(cs_pin_,LOW);
-  for (int i=(sizeof(datagram_write) - 1); i>=0; --i)
+  MisoDatagram miso_datagram;
+  miso_datagram.uint32 = 0x0;
+  spiBeginTransaction();
+  for (int i=(DATAGRAM_SIZE - 1); i>=0; --i)
   {
-    uint8_t byte_write = (datagram_write.uint32 >> (8*i)) & 0xff;
+    uint8_t byte_write = (mosi_datagram.uint32 >> (8*i)) & 0xff;
     uint8_t byte_read = SPI.transfer(byte_write);
-    datagram_read.uint32 |= ((uint32_t)byte_read) << (8*i);
+    miso_datagram.uint32 |= ((uint32_t)byte_read) << (8*i);
   }
-  digitalWrite(cs_pin_,HIGH);
-  SPI.endTransaction();
+  spiEndTransaction();
   noInterrupts();
-  status_ = datagram_read.fields.status;
+  status_ = miso_datagram.fields.status;
   interrupts();
-  return datagram_read;
+  return miso_datagram;
 }
 
 int32_t TMC429::unsignedToSigned(uint32_t input_value, uint8_t num_bits)
@@ -950,4 +948,25 @@ void TMC429::setOptimalPropFactor(const size_t motor,
   prop_factor.fields.pmul = pm;
   prop_factor.fields.pdiv = pd;
   writeRegister(motor,ADDRESS_PROP_FACTOR,prop_factor.uint32);
+}
+
+void TMC429::enableClockSelect()
+{
+  digitalWrite(chip_select_pin_,LOW);
+}
+
+void TMC429::disableClockSelect()
+{
+  digitalWrite(chip_select_pin_,HIGH);
+}
+void TMC429::spiBeginTransaction()
+{
+  SPI.beginTransaction(SPISettings(SPI_CLOCK,SPI_BIT_ORDER,SPI_MODE));
+  enableClockSelect();
+}
+
+void TMC429::spiEndTransaction()
+{
+  disableClockSelect();
+  SPI.endTransaction();
 }
