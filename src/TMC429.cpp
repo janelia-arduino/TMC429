@@ -8,7 +8,7 @@
 
 
 void TMC429::setup(size_t chip_select_pin,
-                   uint8_t clock_frequency_mhz)
+  uint8_t clock_frequency_mhz)
 {
   chip_select_pin_ = chip_select_pin;
 
@@ -69,9 +69,9 @@ uint32_t TMC429::getVelocityMaxUpperLimitInHz()
 }
 
 void TMC429::setLimitsInHz(size_t motor,
-                           uint32_t velocity_min,
-                           uint32_t velocity_max,
-                           uint32_t acceleration_max)
+  uint32_t velocity_min,
+  uint32_t velocity_max,
+  uint32_t acceleration_max)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -159,7 +159,7 @@ int32_t TMC429::getTargetVelocityInHz(size_t motor)
 }
 
 void TMC429::setTargetVelocityInHz(size_t motor,
-                                   int32_t velocity)
+  int32_t velocity)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -199,7 +199,7 @@ int32_t TMC429::getTargetPosition(size_t motor)
 }
 
 void TMC429::setTargetPosition(size_t motor,
-                               int32_t position)
+  int32_t position)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -230,7 +230,7 @@ int32_t TMC429::getActualPosition(size_t motor)
 }
 
 void TMC429::setActualPosition(size_t motor,
-                               int32_t position)
+  int32_t position)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -539,7 +539,7 @@ void TMC429::setStepDirOutput()
 // }
 
 uint32_t TMC429::readRegister(uint8_t smda,
-                              uint8_t address)
+  uint8_t address)
 {
   MosiDatagram mosi_datagram;
   mosi_datagram.fields.rrs = RRS_REGISTER;
@@ -552,8 +552,8 @@ uint32_t TMC429::readRegister(uint8_t smda,
 }
 
 void TMC429::writeRegister(uint8_t smda,
-                           uint8_t address,
-                           uint32_t data)
+  uint8_t address,
+  uint32_t data)
 {
   MosiDatagram mosi_datagram;
   mosi_datagram.fields.rrs = RRS_REGISTER;
@@ -640,7 +640,7 @@ double TMC429::stepDivToStepTime(uint8_t step_div)
 }
 
 int32_t TMC429::convertVelocityToHz(size_t motor,
-                                    int16_t velocity)
+  int16_t velocity)
 {
   // (clock_frequency_*MHZ_PER_HZ*velocity)/((1 << pulse_div_[motor])*VELOCITY_CONSTANT);
   double x = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)VELOCITY_CONSTANT;
@@ -649,7 +649,7 @@ int32_t TMC429::convertVelocityToHz(size_t motor,
 }
 
 int16_t TMC429::convertVelocityFromHz(size_t motor,
-                                      int32_t velocity)
+  int32_t velocity)
 {
   // (velocity*(1 << pulse_div_[motor])*VELOCITY_CONSTANT)/(clock_frequency_*MHZ_PER_HZ);
   double x = ((double)velocity*(double)(1 << pulse_div_[motor]))/((double)clock_frequency_*(double)MHZ_PER_HZ);
@@ -658,7 +658,7 @@ int16_t TMC429::convertVelocityFromHz(size_t motor,
 }
 
 void TMC429::setOptimalPulseDiv(size_t motor,
-                                uint32_t velocity_max_hz)
+  uint32_t velocity_max_hz)
 {
   int8_t pulse_div = PULSE_DIV_MAX + 1;
   uint32_t v_max = 0;
@@ -703,7 +703,7 @@ TMC429::Mode TMC429::getMode(size_t motor)
 }
 
 void TMC429::setMode(size_t motor,
-                     Mode mode)
+  Mode mode)
 {
   if (motor >= MOTOR_COUNT)
   {
@@ -775,7 +775,7 @@ uint16_t TMC429::getVelocityMin(size_t motor)
 }
 
 void TMC429::setVelocityMin(size_t motor,
-                            uint16_t velocity)
+  uint16_t velocity)
 {
   writeRegister(motor,ADDRESS_V_MIN,velocity);
 }
@@ -786,7 +786,7 @@ uint16_t TMC429::getVelocityMax(size_t motor)
 }
 
 void TMC429::setVelocityMax(size_t motor,
-                            uint16_t velocity)
+  uint16_t velocity)
 {
   writeRegister(motor,ADDRESS_V_MAX,velocity);
 }
@@ -798,7 +798,7 @@ int16_t TMC429::getTargetVelocity(size_t motor)
 }
 
 void TMC429::setTargetVelocity(size_t motor,
-                               int16_t velocity)
+  int16_t velocity)
 {
   writeRegister(motor,ADDRESS_V_TARGET,velocity);
 }
@@ -810,7 +810,7 @@ int16_t TMC429::getActualVelocity(size_t motor)
 }
 
 int32_t TMC429::convertAccelerationToHzPerS(size_t motor,
-                                            int16_t acceleration)
+  int16_t acceleration)
 {
   // (clock_frequency_*MHZ_PER_HZ*clock_frequency_*MHZ_PER_HZ*acceleration)/((1 << pulse_div_[motor])*(1 << ramp_div_[motor])*ACCELERATION_CONSTANT);
   double a = ((double)clock_frequency_*(double)MHZ_PER_HZ)/(double)ACCELERATION_CONSTANT;
@@ -822,7 +822,7 @@ int32_t TMC429::convertAccelerationToHzPerS(size_t motor,
 }
 
 int16_t TMC429::convertAccelerationFromHzPerS(size_t motor,
-                                              int32_t acceleration)
+  int32_t acceleration)
 {
   // (acceleration*(1 << pulse_div_[motor])*(1 << ramp_div_[motor])*ACCELERATION_CONSTANT)/(clock_frequency_*MHZ_PER_HZ*clock_frequency_*MHZ_PER_HZ);
   double a = ((double)acceleration*(double)(1 << pulse_div_[motor]))/((double)clock_frequency_*(double)MHZ_PER_HZ);
@@ -833,14 +833,14 @@ int16_t TMC429::convertAccelerationFromHzPerS(size_t motor,
 }
 
 void TMC429::setOptimalRampDiv(size_t motor,
-                               uint32_t acceleration_max_hz_per_s)
+  uint32_t acceleration_max_hz_per_s)
 {
   int8_t ramp_div = RAMP_DIV_MAX + 1;
   uint32_t a_max = 0;
 
   while ((a_max < acceleration_max_hz_per_s) &&
-         (ramp_div >= 1) &&
-         (ramp_div >= pulse_div_[motor]))
+    (ramp_div >= 1) &&
+    (ramp_div >= pulse_div_[motor]))
   {
     --ramp_div;
     ramp_div_[motor] = ramp_div;
@@ -874,7 +874,7 @@ uint16_t TMC429::getAccelerationMax(size_t motor)
 }
 
 uint16_t TMC429::setAccelerationMax(size_t motor,
-                                    uint16_t acceleration)
+  uint16_t acceleration)
 {
   uint32_t a_max = acceleration;
   uint32_t a_max_upper_limit = getAccelerationMaxUpperLimit(motor);
@@ -898,7 +898,7 @@ int16_t TMC429::getActualAcceleration(size_t motor)
 }
 
 void TMC429::setOptimalPropFactor(size_t motor,
-                                  uint16_t acceleration_max)
+  uint16_t acceleration_max)
 {
   // int pdiv, pmul, pm, pd ;
   // double p_ideal, p_best, p, p_reduced;

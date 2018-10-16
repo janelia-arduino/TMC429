@@ -14,7 +14,7 @@ class TMC429
 {
 public:
   void setup(size_t chip_select_pin,
-             uint8_t clock_frequency_mhz);
+    uint8_t clock_frequency_mhz);
 
   bool communicating();
   uint32_t getVersion();
@@ -28,9 +28,9 @@ public:
   uint32_t getVelocityMaxUpperLimitInHz();
 
   void setLimitsInHz(size_t motor,
-                     uint32_t velocity_min,
-                     uint32_t velocity_max,
-                     uint32_t acceleration_max);
+    uint32_t velocity_min,
+    uint32_t velocity_max,
+    uint32_t acceleration_max);
 
   uint32_t getAccelerationMaxInHzPerS(size_t motor);
   uint32_t getAccelerationMaxUpperLimitInHzPerS(size_t motor);
@@ -42,19 +42,19 @@ public:
 
   int32_t getTargetVelocityInHz(size_t motor);
   void setTargetVelocityInHz(size_t motor,
-                             int32_t velocity);
+    int32_t velocity);
   bool atTargetVelocity(size_t motor);
 
   int32_t getActualVelocityInHz(size_t motor);
 
   int32_t getTargetPosition(size_t motor);
   void setTargetPosition(size_t motor,
-                         int32_t position);
+    int32_t position);
   bool atTargetPosition(size_t motor);
 
   int32_t getActualPosition(size_t motor);
   void setActualPosition(size_t motor,
-                         int32_t position);
+    int32_t position);
 
   void stop(size_t motor);
   void stopAll();
@@ -332,10 +332,10 @@ private:
   // void setSpiOutput();
 
   uint32_t readRegister(uint8_t smda,
-                        uint8_t address);
+    uint8_t address);
   void writeRegister(uint8_t smda,
-                     uint8_t address,
-                     uint32_t data);
+    uint8_t address,
+    uint32_t data);
   MisoDatagram writeRead(MosiDatagram mosi_datagram);
 
   int32_t unsignedToSigned(uint32_t input_value, uint8_t num_bits);
@@ -348,16 +348,16 @@ private:
   double stepDivToStepTime(uint8_t step_div);
 
   int32_t convertVelocityToHz(size_t motor,
-                              int16_t velocity);
+    int16_t velocity);
   int16_t convertVelocityFromHz(size_t motor,
-                                int32_t velocity);
+    int32_t velocity);
 
   void setOptimalPulseDiv(size_t motor,
-                          uint32_t velocity_max_hz);
+    uint32_t velocity_max_hz);
 
   Mode getMode(size_t motor);
   void setMode(size_t motor,
-               Mode mode);
+    Mode mode);
 
   ReferenceConfiguration getReferenceConfiguration(size_t motor);
 
@@ -372,37 +372,37 @@ private:
 
   uint16_t getVelocityMin(size_t motor);
   void setVelocityMin(size_t motor,
-                      uint16_t velocity);
+    uint16_t velocity);
 
   uint16_t getVelocityMax(size_t motor);
   void setVelocityMax(size_t motor,
-                      uint16_t velocity);
+    uint16_t velocity);
 
   int16_t getTargetVelocity(size_t motor);
   void setTargetVelocity(size_t motor,
-                         int16_t velocity);
+    int16_t velocity);
 
   int16_t getActualVelocity(size_t motor);
 
   int32_t convertAccelerationToHzPerS(size_t motor,
-                                      int16_t acceleration);
+    int16_t acceleration);
   int16_t convertAccelerationFromHzPerS(size_t motor,
-                                        int32_t acceleration);
+    int32_t acceleration);
 
   void setOptimalRampDiv(size_t motor,
-                         uint32_t acceleration_max_hz_per_s);
+    uint32_t acceleration_max_hz_per_s);
 
   uint16_t getAccelerationMaxUpperLimit(size_t motor);
   uint16_t getAccelerationMaxLowerLimit(size_t motor);
 
   uint16_t getAccelerationMax(size_t motor);
   uint16_t setAccelerationMax(size_t motor,
-                              uint16_t acceleration);
+    uint16_t acceleration);
 
   int16_t getActualAcceleration(size_t motor);
 
   void setOptimalPropFactor(size_t motor,
-                            uint16_t acceleration_max);
+    uint16_t acceleration_max);
 
   void enableClockSelect();
   void disableClockSelect();
