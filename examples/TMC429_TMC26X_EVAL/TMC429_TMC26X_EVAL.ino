@@ -2,7 +2,6 @@
 #include <SPI.h>
 #include <Streaming.h>
 #include <TMC429.h>
-#include <TMC26X.h>
 
 
 const long BAUD = 115200;
@@ -21,7 +20,6 @@ const int ACCELERATION_MAX = 50000;
 const int MOTOR = 0;
 
 TMC429 step_dir_controller;
-TMC26X stepper_drivers[MOTOR_COUNT];
 long velocity_inc, velocity_max;
 long target_velocity, actual_velocity;
 
@@ -46,13 +44,6 @@ void setup()
     step_dir_controller.setLimitsInHz(motor,VELOCITY_MIN,velocity_max,ACCELERATION_MAX);
     step_dir_controller.disableLeftSwitchStop(motor);
     step_dir_controller.disableRightSwitchStop(motor);
-
-    stepper_drivers[motor].setup(CHIP_SELECT_PIN_26X[motor]);
-    stepper_drivers[motor].setStepDirInput();
-    stepper_drivers[motor].setDefaultChopperConfig();
-    stepper_drivers[motor].disableCoolStep();
-    stepper_drivers[motor].setCurrentScalePercent(CURRENT_SCALE_PERCENT);
-    stepper_drivers[motor].setMicrostepsPerStepTo256();
   }
 
   target_velocity = -velocity_max;
