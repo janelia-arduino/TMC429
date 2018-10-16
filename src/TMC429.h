@@ -338,7 +338,8 @@ private:
     uint32_t data);
   MisoDatagram writeRead(MosiDatagram mosi_datagram);
 
-  int32_t unsignedToSigned(uint32_t input_value, uint8_t num_bits);
+  int32_t unsignedToSigned(uint32_t input_value,
+    uint8_t num_bits);
 
   void specifyClockFrequencyInMHz(uint8_t clock_frequency);
 

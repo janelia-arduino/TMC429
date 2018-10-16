@@ -582,7 +582,8 @@ TMC429::MisoDatagram TMC429::writeRead(MosiDatagram mosi_datagram)
   return miso_datagram;
 }
 
-int32_t TMC429::unsignedToSigned(uint32_t input_value, uint8_t num_bits)
+int32_t TMC429::unsignedToSigned(uint32_t input_value,
+  uint8_t num_bits)
 {
   uint32_t mask = 1 << (num_bits - 1);
   return -(input_value & mask) + (input_value & ~mask);
