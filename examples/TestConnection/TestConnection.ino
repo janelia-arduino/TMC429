@@ -7,7 +7,7 @@
 const long BAUD = 115200;
 const int LOOP_DELAY = 2000;
 const int CHIP_SELECT_PIN = 10;
-const int CLOCK_FREQUENCY_MHZ = 16;
+const int CLOCK_FREQUENCY_MHZ = 32;
 const int MOTOR = 0;
 
 // Instantiate TMC429
@@ -32,6 +32,9 @@ void setup()
 
 void loop()
 {
+  bool communicating = tmc429.communicating();
+  Serial << "communicating: " << communicating << "\n";
+
   tmc429.setVelocityMode(MOTOR);
   // tmc429.setRampMode(MOTOR);
 

@@ -4,7 +4,7 @@
 
 * Library Information
   - Name :: TMC429
-  - Version :: 1.0.4
+  - Version :: 1.0.5
   - License :: BSD
   - URL :: https://github.com/janelia-arduino/TMC429
   - Author :: Peter Polidoro

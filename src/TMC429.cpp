@@ -951,23 +951,25 @@ void TMC429::setOptimalPropFactor(size_t motor,
   writeRegister(motor,ADDRESS_PROP_FACTOR,prop_factor.uint32);
 }
 
-void TMC429::enableClockSelect()
+void TMC429::enableChipSelect()
 {
   digitalWrite(chip_select_pin_,LOW);
 }
 
-void TMC429::disableClockSelect()
+void TMC429::disableChipSelect()
 {
   digitalWrite(chip_select_pin_,HIGH);
 }
 void TMC429::spiBeginTransaction()
 {
+  enableChipSelect();
+  delayMicroseconds(1);
   SPI.beginTransaction(SPISettings(SPI_CLOCK,SPI_BIT_ORDER,SPI_MODE));
-  enableClockSelect();
 }
 
 void TMC429::spiEndTransaction()
 {
-  disableClockSelect();
   SPI.endTransaction();
+  delayMicroseconds(1);
+  disableChipSelect();
 }

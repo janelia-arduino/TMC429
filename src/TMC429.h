@@ -9,7 +9,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-
+#include <Streaming.h>
 class TMC429
 {
 public:
@@ -405,8 +405,8 @@ private:
   void setOptimalPropFactor(size_t motor,
     uint16_t acceleration_max);
 
-  void enableClockSelect();
-  void disableClockSelect();
+  void enableChipSelect();
+  void disableChipSelect();
   void spiBeginTransaction();
   void spiEndTransaction();
 };
