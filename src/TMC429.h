@@ -70,17 +70,21 @@ public:
 
   void enableLeftSwitchStop(size_t motor);
   void disableLeftSwitchStop(size_t motor);
+  bool leftSwitchStopEnabled(size_t motor);
   bool leftSwitchActive(size_t motor);
 
   void enableRightSwitches();
   void disableRightSwitches();
+  bool rightSwitchesEnabled();
 
   void enableRightSwitchStop(size_t motor);
   void disableRightSwitchStop(size_t motor);
+  bool rightSwitchStopEnabled(size_t motor);
   bool rightSwitchActive(size_t motor);
 
   void enableSwitchSoftStop(size_t motor);
   void disableSwitchSoftStop(size_t motor);
+  bool switchSoftStopEnabled(size_t motor);
 
   void setReferenceSwitchToLeft(size_t motor);
   void setReferenceSwitchToRight(size_t motor);

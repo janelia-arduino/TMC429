@@ -329,6 +329,17 @@ void TMC429::disableLeftSwitchStop(size_t motor)
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
 }
 
+bool TMC429::leftSwitchStopEnabled(size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return false;
+  }
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  return !ref_conf_mode.fields.ref_conf.disable_stop_l;
+}
+
 bool TMC429::leftSwitchActive(size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -373,6 +384,13 @@ void TMC429::disableRightSwitches()
   writeRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429,if_conf.uint32);
 }
 
+bool TMC429::rightSwitchesEnabled()
+{
+  IfConf if_conf;
+  if_conf.uint32 = readRegister(SMDA_COMMON,ADDRESS_IF_CONFIGURATION_429);
+  return if_conf.fields.if_conf.en_refr;
+}
+
 void TMC429::enableRightSwitchStop(size_t motor)
 {
   if (motor >= MOTOR_COUNT)
@@ -395,6 +413,17 @@ void TMC429::disableRightSwitchStop(size_t motor)
   ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
   ref_conf_mode.fields.ref_conf.disable_stop_r = 1;
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+bool TMC429::rightSwitchStopEnabled(size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return false;
+  }
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  return !ref_conf_mode.fields.ref_conf.disable_stop_r;
 }
 
 bool TMC429::rightSwitchActive(size_t motor)
@@ -447,6 +476,17 @@ void TMC429::disableSwitchSoftStop(size_t motor)
   ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
   ref_conf_mode.fields.ref_conf.soft_stop = 0;
   writeRegister(motor,ADDRESS_REF_CONF_MODE,ref_conf_mode.uint32);
+}
+
+bool TMC429::switchSoftStopEnabled(size_t motor)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return false;
+  }
+  RefConfMode ref_conf_mode;
+  ref_conf_mode.uint32 = readRegister(motor,ADDRESS_REF_CONF_MODE);
+  return ref_conf_mode.fields.ref_conf.soft_stop;
 }
 
 void TMC429::setReferenceSwitchToLeft(size_t motor)

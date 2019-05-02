@@ -27,7 +27,6 @@ void setup()
   Serial << "communicating: " << communicating << "\n";
 
   tmc429.initialize();
-
 }
 
 void loop()
@@ -85,13 +84,28 @@ void loop()
   Serial << "at_target_position = " << tmc429.atTargetPosition(MOTOR) << "\n";
   Serial << "at_target_velocity = " << tmc429.atTargetVelocity(MOTOR) << "\n";
 
+  tmc429.disableRightSwitches();
+  Serial << "After disabling, right switches enabled = " << tmc429.rightSwitchesEnabled() << "\n";
   tmc429.enableRightSwitches();
+  Serial << "After enabling, right switches enabled = " << tmc429.rightSwitchesEnabled() << "\n";
   tmc429.setReferenceSwitchToLeft(MOTOR);
 
   tmc429.setSwitchesActiveLow();
   tmc429.disableSwitchSoftStop(MOTOR);
+  Serial << "After disabling, switch soft stop enabled = " << tmc429.switchSoftStopEnabled(MOTOR) << "\n";
+  tmc429.enableSwitchSoftStop(MOTOR);
+  Serial << "After enabling, switch soft stop enabled = " << tmc429.switchSoftStopEnabled(MOTOR) << "\n";
+
+  tmc429.disableLeftSwitchStop(MOTOR);
+  Serial << "After disabling, left switch stop enabled = " << tmc429.leftSwitchStopEnabled(MOTOR) << "\n";
   tmc429.enableLeftSwitchStop(MOTOR);
+  Serial << "After enabling, left switch stop enabled = " << tmc429.leftSwitchStopEnabled(MOTOR) << "\n";
+
+  tmc429.disableRightSwitchStop(MOTOR);
+  Serial << "After disabling, right switch stop enabled = " << tmc429.rightSwitchStopEnabled(MOTOR) << "\n";
   tmc429.enableRightSwitchStop(MOTOR);
+  Serial << "After enabling, right switch stop enabled = " << tmc429.rightSwitchStopEnabled(MOTOR) << "\n";
+
   Serial << "left_switch_active = " << tmc429.leftSwitchActive(MOTOR) << "\n";
   Serial << "right_switch_active = " << tmc429.rightSwitchActive(MOTOR) << "\n";
 
