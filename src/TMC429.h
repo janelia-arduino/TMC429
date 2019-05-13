@@ -176,6 +176,7 @@ private:
   const static uint8_t RAMP_DIV_MAX = 13;
   const static uint32_t ACCELERATION_REGISTER_MAX = 2047;
   const static uint32_t ACCELERATION_CONSTANT = 536870912; // (1 << 29)
+  const static uint16_t VELOCITY_MIN_MIN = 1;
 
   Status status_;
   uint8_t clock_frequency_;

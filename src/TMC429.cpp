@@ -818,6 +818,10 @@ uint16_t TMC429::getVelocityMin(size_t motor)
 void TMC429::setVelocityMin(size_t motor,
   uint16_t velocity)
 {
+  if (velocity < VELOCITY_MIN_MIN)
+  {
+    velocity = VELOCITY_MIN_MIN;
+  }
   writeRegister(motor,ADDRESS_V_MIN,velocity);
 }
 
