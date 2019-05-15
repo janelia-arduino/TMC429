@@ -9,6 +9,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#include <Streaming.h>
+
 class TMC429
 {
 public:
@@ -24,16 +26,12 @@ public:
   void setSoftMode(size_t motor);
   void setVelocityMode(size_t motor);
 
-  uint32_t getVelocityMaxUpperLimitInHz();
-
   void setLimitsInHz(size_t motor,
     uint32_t velocity_min,
     uint32_t velocity_max,
     uint32_t acceleration_max);
 
   uint32_t getAccelerationMaxInHzPerS(size_t motor);
-  uint32_t getAccelerationMaxUpperLimitInHzPerS(size_t motor);
-
   uint32_t getActualAccelerationInHzPerS(size_t motor);
 
   uint32_t getVelocityMinInHz(size_t motor);
@@ -107,6 +105,20 @@ public:
   };
   Status getStatus();
 
+  uint32_t getVelocityMaxUpperLimitInHz();
+  const static uint8_t PULSE_DIV_MIN = 0;
+  const static uint8_t PULSE_DIV_MAX = 13;
+  uint32_t getVelocityMaxUpperLimitInHz(uint8_t pulse_div);
+
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max);
+  const static uint8_t RAMP_DIV_MIN = 0;
+  const static uint8_t RAMP_DIV_MAX = 13;
+  // valid if (((ramp_div - pulse_div + 12) >= 1)
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div);
+  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div);
+
 private:
   enum Mode
   {
@@ -167,12 +179,12 @@ private:
   const static uint32_t VERSION = 0x429101;
 
   const static uint8_t CLOCK_FREQUENCY_MAX = 32;
-  const static uint8_t PULSE_DIV_MAX = 13;
   const static uint8_t STEP_DIV_MAX = 15;
   const static uint32_t MHZ_PER_HZ = 1000000;
   const static uint32_t VELOCITY_CONSTANT = 65536;
+  const static uint32_t VELOCITY_REGISTER_MIN = 0;
   const static uint32_t VELOCITY_REGISTER_MAX = 2047;
-  const static uint8_t RAMP_DIV_MAX = 13;
+  const static uint32_t ACCELERATION_REGISTER_MIN = 1;
   const static uint32_t ACCELERATION_REGISTER_MAX = 2047;
   const static uint32_t ACCELERATION_CONSTANT = 536870912; // (1 << 29)
   const static uint16_t VELOCITY_MIN_MIN = 1;
@@ -352,11 +364,12 @@ private:
   void setStepDiv(uint8_t step_div);
   double stepDivToStepTime(uint8_t step_div);
 
-  int32_t convertVelocityToHz(size_t motor,
+  int32_t convertVelocityToHz(uint8_t pulse_div,
     int16_t velocity);
-  int16_t convertVelocityFromHz(size_t motor,
+  int16_t convertVelocityFromHz(uint8_t pulse_div,
     int32_t velocity);
 
+  uint8_t findOptimalPulseDiv(uint32_t velocity_max_hz);
   void setOptimalPulseDiv(size_t motor,
     uint32_t velocity_max_hz);
 
@@ -389,12 +402,17 @@ private:
 
   int16_t getActualVelocity(size_t motor);
 
-  int32_t convertAccelerationToHzPerS(size_t motor,
+  int32_t convertAccelerationToHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div,
     int16_t acceleration);
-  int16_t convertAccelerationFromHzPerS(size_t motor,
+  int16_t convertAccelerationFromHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div,
     int32_t acceleration);
 
+  uint8_t findOptimalRampDiv(uint32_t velocity_max_hz,
+    uint32_t acceleration_max_hz_per_s);
   void setOptimalRampDiv(size_t motor,
+    uint32_t velocity_max_hz,
     uint32_t acceleration_max_hz_per_s);
 
   uint16_t getAccelerationMaxUpperLimit(size_t motor);
