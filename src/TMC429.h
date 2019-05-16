@@ -31,9 +31,7 @@ public:
     uint32_t velocity_max,
     uint32_t acceleration_max);
 
-  uint32_t getAccelerationMaxInHzPerS(size_t motor);
-  uint32_t getActualAccelerationInHzPerS(size_t motor);
-
+  uint32_t getVelocityMaxUpperLimitInHz();
   uint32_t getVelocityMinInHz(size_t motor);
   uint32_t getVelocityMaxInHz(size_t motor);
 
@@ -43,6 +41,11 @@ public:
   bool atTargetVelocity(size_t motor);
 
   int32_t getActualVelocityInHz(size_t motor);
+
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max);
+  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max);
+  uint32_t getAccelerationMaxInHzPerS(size_t motor);
+  uint32_t getActualAccelerationInHzPerS(size_t motor);
 
   int32_t getTargetPosition(size_t motor);
   void setTargetPosition(size_t motor,
@@ -104,20 +107,6 @@ public:
     uint8_t interrupt : 1;
   };
   Status getStatus();
-
-  uint32_t getVelocityMaxUpperLimitInHz();
-  const static uint8_t PULSE_DIV_MIN = 0;
-  const static uint8_t PULSE_DIV_MAX = 13;
-  uint32_t getVelocityMaxUpperLimitInHz(uint8_t pulse_div);
-
-  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max);
-  const static uint8_t RAMP_DIV_MIN = 0;
-  const static uint8_t RAMP_DIV_MAX = 13;
-  // valid if (((ramp_div - pulse_div + 12) >= 1)
-  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint8_t pulse_div,
-    uint8_t ramp_div);
-  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint8_t pulse_div,
-    uint8_t ramp_div);
 
 private:
   enum Mode
@@ -184,6 +173,7 @@ private:
   const static uint32_t VELOCITY_CONSTANT = 65536;
   const static uint32_t VELOCITY_REGISTER_MIN = 0;
   const static uint32_t VELOCITY_REGISTER_MAX = 2047;
+  const static uint32_t VELOCITY_REGISTER_THRESHOLD = 1448;
   const static uint32_t ACCELERATION_REGISTER_MIN = 1;
   const static uint32_t ACCELERATION_REGISTER_MAX = 2047;
   const static uint32_t ACCELERATION_CONSTANT = 536870912; // (1 << 29)
@@ -359,7 +349,7 @@ private:
 
   void specifyClockFrequencyInMHz(uint8_t clock_frequency);
 
-  void setOptimalStepDiv(uint32_t velocity_max_hz);
+  void setOptimalStepDivHz(uint32_t velocity_max_hz);
   uint8_t getStepDiv();
   void setStepDiv(uint8_t step_div);
   double stepDivToStepTime(uint8_t step_div);
@@ -369,8 +359,8 @@ private:
   int16_t convertVelocityFromHz(uint8_t pulse_div,
     int32_t velocity);
 
-  uint8_t findOptimalPulseDiv(uint32_t velocity_max_hz);
-  void setOptimalPulseDiv(size_t motor,
+  uint8_t findOptimalPulseDivHz(uint32_t velocity_max_hz);
+  void setOptimalPulseDivHz(size_t motor,
     uint32_t velocity_max_hz);
 
   Mode getMode(size_t motor);
@@ -389,12 +379,12 @@ private:
   double getStepTimeInMicroS();
 
   uint16_t getVelocityMin(size_t motor);
-  void setVelocityMin(size_t motor,
-    uint16_t velocity);
+  void setVelocityMinInHz(size_t motor,
+    uint32_t velocity_min_hz);
 
   uint16_t getVelocityMax(size_t motor);
-  void setVelocityMax(size_t motor,
-    uint16_t velocity);
+  void setVelocityMaxInHz(size_t motor,
+    uint32_t velocity_max_hz);
 
   int16_t getTargetVelocity(size_t motor);
   void setTargetVelocity(size_t motor,
@@ -402,30 +392,40 @@ private:
 
   int16_t getActualVelocity(size_t motor);
 
-  int32_t convertAccelerationToHzPerS(uint8_t pulse_div,
+  uint32_t convertAccelerationToHzPerS(uint8_t pulse_div,
     uint8_t ramp_div,
-    int16_t acceleration);
-  int16_t convertAccelerationFromHzPerS(uint8_t pulse_div,
+    uint32_t acceleration);
+  uint32_t convertAccelerationFromHzPerS(uint8_t pulse_div,
     uint8_t ramp_div,
-    int32_t acceleration);
+    uint32_t acceleration);
 
-  uint8_t findOptimalRampDiv(uint32_t velocity_max_hz,
+  uint8_t findOptimalRampDivHz(uint32_t velocity_max_hz,
     uint32_t acceleration_max_hz_per_s);
-  void setOptimalRampDiv(size_t motor,
+  void setOptimalRampDivHz(size_t motor,
     uint32_t velocity_max_hz,
     uint32_t acceleration_max_hz_per_s);
 
-  uint16_t getAccelerationMaxUpperLimit(size_t motor);
-  uint16_t getAccelerationMaxLowerLimit(size_t motor);
+  const static uint8_t PULSE_DIV_MIN = 0;
+  const static uint8_t PULSE_DIV_MAX = 13;
+  uint32_t getVelocityMaxUpperLimitInHz(uint8_t pulse_div);
 
-  uint16_t getAccelerationMax(size_t motor);
-  uint16_t setAccelerationMax(size_t motor,
-    uint16_t acceleration);
+  const static uint8_t RAMP_DIV_MIN = 0;
+  const static uint8_t RAMP_DIV_MAX = 13;
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div);
+  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint8_t pulse_div,
+    uint8_t ramp_div,
+    uint32_t velocity_max);
+
+  uint32_t getAccelerationMax(size_t motor);
+  uint32_t setAccelerationMaxInHzPerS(size_t motor,
+    uint32_t velocity_max_hz,
+    uint32_t acceleration_max_hz_per_s);
 
   int16_t getActualAcceleration(size_t motor);
 
   void setOptimalPropFactor(size_t motor,
-    uint16_t acceleration_max);
+    uint32_t acceleration_max);
 
   void enableChipSelect();
   void disableChipSelect();
