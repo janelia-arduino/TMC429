@@ -61,26 +61,26 @@ void TMC429::setVelocityMode(size_t motor)
 }
 
 void TMC429::setLimitsInHz(size_t motor,
-  uint32_t velocity_min,
-  uint32_t velocity_max,
-  uint32_t acceleration_max)
+  uint32_t velocity_min_hz,
+  uint32_t velocity_max_hz,
+  uint32_t acceleration_max_hz_per_s)
 {
   if (motor >= MOTOR_COUNT)
   {
     return;
   }
 
-  setOptimalStepDivHz(velocity_max);
+  setOptimalStepDivHz(velocity_max_hz);
 
-  setOptimalPulseDivHz(motor,velocity_max);
+  setOptimalPulseDivHz(motor,velocity_max_hz);
 
-  setVelocityMinInHz(motor,velocity_min);
+  setVelocityMinInHz(motor,velocity_min_hz);
 
-  setVelocityMaxInHz(motor,velocity_max);
+  setVelocityMaxInHz(motor,velocity_max_hz);
 
-  setOptimalRampDivHz(motor,velocity_max,acceleration_max);
+  setOptimalRampDivHz(motor,velocity_max_hz,acceleration_max_hz_per_s);
 
-  uint32_t a_max = setAccelerationMaxInHzPerS(motor,velocity_max,acceleration_max);
+  uint32_t a_max = setAccelerationMaxInHzPerS(motor,velocity_max_hz,acceleration_max_hz_per_s);
 
   setOptimalPropFactor(motor,a_max);
 }
@@ -118,13 +118,13 @@ int32_t TMC429::getTargetVelocityInHz(size_t motor)
 }
 
 void TMC429::setTargetVelocityInHz(size_t motor,
-  int32_t velocity)
+  int32_t velocity_hz)
 {
   if (motor >= MOTOR_COUNT)
   {
     return;
   }
-  setTargetVelocity(motor,convertVelocityFromHz(pulse_div_[motor],velocity));
+  setTargetVelocity(motor,convertVelocityFromHz(pulse_div_[motor],velocity_hz));
 }
 
 bool TMC429::atTargetVelocity(size_t motor)
@@ -147,9 +147,9 @@ int32_t TMC429::getActualVelocityInHz(size_t motor)
   return convertVelocityToHz(pulse_div_[motor],getActualVelocity(motor));
 }
 
-uint32_t TMC429::getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max)
+uint32_t TMC429::getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max_hz)
 {
-  uint8_t pulse_div = findOptimalPulseDivHz(velocity_max);
+  uint8_t pulse_div = findOptimalPulseDivHz(velocity_max_hz);
   uint8_t ramp_div;
   if (pulse_div > 0)
   {
@@ -162,11 +162,11 @@ uint32_t TMC429::getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max)
   return getAccelerationMaxUpperLimitInHzPerS(pulse_div,ramp_div);
 }
 
-uint32_t TMC429::getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max)
+uint32_t TMC429::getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max_hz)
 {
-  uint8_t pulse_div = findOptimalPulseDivHz(velocity_max);
+  uint8_t pulse_div = findOptimalPulseDivHz(velocity_max_hz);
   uint8_t ramp_div = RAMP_DIV_MAX;
-  return getAccelerationMaxLowerLimitInHzPerS(pulse_div,ramp_div,velocity_max);
+  return getAccelerationMaxLowerLimitInHzPerS(pulse_div,ramp_div,velocity_max_hz);
 }
 
 uint32_t TMC429::getAccelerationMaxInHzPerS(size_t motor)

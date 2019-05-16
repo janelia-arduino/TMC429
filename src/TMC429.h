@@ -27,9 +27,9 @@ public:
   void setVelocityMode(size_t motor);
 
   void setLimitsInHz(size_t motor,
-    uint32_t velocity_min,
-    uint32_t velocity_max,
-    uint32_t acceleration_max);
+    uint32_t velocity_min_hz,
+    uint32_t velocity_max_hz,
+    uint32_t acceleration_max_hz_per_s);
 
   uint32_t getVelocityMaxUpperLimitInHz();
   uint32_t getVelocityMinInHz(size_t motor);
@@ -37,13 +37,13 @@ public:
 
   int32_t getTargetVelocityInHz(size_t motor);
   void setTargetVelocityInHz(size_t motor,
-    int32_t velocity);
+    int32_t velocity_hz);
   bool atTargetVelocity(size_t motor);
 
   int32_t getActualVelocityInHz(size_t motor);
 
-  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max);
-  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max);
+  uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max_hz);
+  uint32_t getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max_hz);
   uint32_t getAccelerationMaxInHzPerS(size_t motor);
   uint32_t getActualAccelerationInHzPerS(size_t motor);
 
