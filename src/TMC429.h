@@ -160,7 +160,11 @@ private:
 
   // SPISettings
   const static uint32_t SPI_CLOCK = 1000000;
+#if defined(ARDUINO_ARCH_SAMD)
+  const static BitOrder SPI_BIT_ORDER = MSBFIRST;
+#else
   const static uint8_t SPI_BIT_ORDER = MSBFIRST;
+#endif
   const static uint8_t SPI_MODE = SPI_MODE3;
 
   const static uint8_t MOTOR_COUNT = 3;
