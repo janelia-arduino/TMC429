@@ -22,15 +22,15 @@ class MyTMC429 : public TMC429 {
       spi->begin(SCLK_PIN, MISO_PIN, MOSI_PIN);
     }
 
-    void spiBeginTransaction(SPISettings settings) {
+    void spiBeginTransaction(SPISettings settings) override {
       spi->beginTransaction(settings);
     }
 
-    void spiEndTransaction() {
+    void spiEndTransaction() override {
       spi->endTransaction();
     }
 
-    uint8_t spiTransfer(uint8_t byte) {
+    uint8_t spiTransfer(uint8_t byte) override {
       return spi->transfer(byte);
     }
 };
@@ -68,7 +68,6 @@ void loop()
 
   bool communicating = tmc429.communicating();
   Serial << "communicating: " << communicating << "\n\n";
-  Serial << "version: " << tmc429.getVersion() << "\n\n";
   Serial << "\n";
   delay(LOOP_DELAY);
 }
