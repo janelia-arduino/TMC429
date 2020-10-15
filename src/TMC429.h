@@ -433,8 +433,14 @@ private:
 
   void enableChipSelect();
   void disableChipSelect();
-  void spiBeginTransaction();
-  void spiEndTransaction();
+  void beginTransaction();
+  void endTransaction();
+
+protected:
+  virtual void spiBegin();
+  virtual void spiBeginTransaction(SPISettings);
+  virtual void spiEndTransaction();
+  virtual uint8_t spiTransfer(uint8_t);
 };
 
 #endif
