@@ -9,8 +9,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include <Streaming.h>
-
 class TMC429
 {
 public:
