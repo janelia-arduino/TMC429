@@ -106,6 +106,11 @@ public:
   };
   Status getStatus();
 
+  uint32_t readRegister(uint8_t smda,
+    uint8_t address);
+  void writeRegister(uint8_t smda,
+    uint8_t address,
+    uint32_t data);
 private:
   enum Mode
   {
@@ -339,11 +344,6 @@ private:
   void setStepDirOutput();
   // void setSpiOutput();
 
-  uint32_t readRegister(uint8_t smda,
-    uint8_t address);
-  void writeRegister(uint8_t smda,
-    uint8_t address,
-    uint32_t data);
   MisoDatagram writeRead(MosiDatagram mosi_datagram);
 
   int32_t unsignedToSigned(uint32_t input_value,
