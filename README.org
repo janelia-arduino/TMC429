@@ -1,6 +1,6 @@
 #+TITLE: TMC429
 #+AUTHOR: Peter Polidoro
-#+EMAIL: peterpolidoro@gmail.com
+#+EMAIL: peter@polidoro.io
 
 * Library Information
   - Name :: TMC429
@@ -8,7 +8,7 @@
   - License :: BSD
   - URL :: https://github.com/janelia-arduino/TMC429
   - Author :: Peter Polidoro
-  - Email :: peterpolidoro@gmail.com
+  - Email :: peter@polidoro.io
 
   The Trinamic TMC429 is a triple-axis dedicated step and direction
   motion controller with acceleration and deceleration trapezoidal
