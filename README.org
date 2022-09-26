@@ -3,13 +3,56 @@
 #+EMAIL: peter@polidoro.io
 
 * Library Information
-  - Name :: TMC429
-  - Version :: 1.3.1
-  - License :: BSD
-  - URL :: https://github.com/janelia-arduino/TMC429
-  - Author :: Peter Polidoro
-  - Email :: peter@polidoro.io
+- Name :: TMC429
+- Version :: 1.3.2
+- License :: BSD
+- URL :: https://github.com/janelia-arduino/TMC429
+- Author :: Peter Polidoro
+- Email :: peter@polidoro.io
 
-  The Trinamic TMC429 is a triple-axis dedicated step and direction
-  motion controller with acceleration and deceleration trapezoidal
-  ramps.
+** Description
+
+The Trinamic TMC429 is a triple-axis dedicated step and direction motion
+controller for both position and velocity control with acceleration and
+deceleration trapezoidal ramps.
+
+[[./images/TMC429.png]]
+
+* Stepper Motors
+
+From Wikipedia, the free encyclopedia:
+
+A stepper motor, also known as step motor or stepping motor, is a brushless DC
+electric motor that divides a full rotation into a number of equal steps. The
+motor's position can be commanded to move and hold at one of these steps without
+any position sensor for feedback (an open-loop controller), as long as the motor
+is correctly sized to the application in respect to torque and speed.
+
+[[https://en.wikipedia.org/wiki/Stepper_motor][Wikipedia - Stepper Motor]]
+
+* Stepper Motor Controllers and Drivers
+
+Stepper motors need both a controller and a driver. These may be combined into a
+single component or separated into multiple components that communicate with
+each other, as is the case with the TMC429 stepper motor controller. One
+controller may be connected to more than one driver for coordinated multi-axis
+motion control.
+
+** Stepper Motor Controller
+
+A stepper motor controller is responsible for the commanding either the motor
+kinetics, the torque, or the motor kinematics, the position, speed, and
+acceleration of one or more stepper motors.
+
+[[./images/stepper_controller.png]]
+
+** Stepper Motor Driver
+
+A stepper motor driver is responsible for commanding the electrical current
+through the motor coils as it changes with time to meet the requirements of the
+stepper motor controller.
+
+[[./images/stepper_driver.png]]
+
+
+
