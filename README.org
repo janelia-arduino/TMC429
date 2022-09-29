@@ -4,7 +4,7 @@
 
 * Library Information
 - Name :: TMC429
-- Version :: 1.3.2
+- Version :: 1.3.3
 - License :: BSD
 - URL :: https://github.com/janelia-arduino/TMC429
 - Author :: Peter Polidoro
@@ -54,5 +54,23 @@ stepper motor controller.
 
 [[./images/stepper_driver.png]]
 
+* TMC429
 
+[[./images/block_diagram.png]]
 
+** Wiring
+
+[[https://github.com/janelia-kicad/stepper_controller_3x2][Example Circuit Board]]
+
+*** Required
+
+- Power supply (3.3V or 5V)
+- Clock (4-32MHz)
+- SPI to microcontroller (MOSI, MISO, SCK, CS)
+- Step and Direction signals to each of the stepper drivers
+
+*** Optional
+
+- INT and POSCOMP signals to microcontroller
+- Reference signals (left and/or right) from limit switches attached to each
+  stepper motor
