@@ -18,9 +18,6 @@ void setup()
   Serial.begin(BAUD);
 
   tmc429.setup(CHIP_SELECT_PIN,CLOCK_FREQUENCY_MHZ);
-
-  tmc429.initialize();
-
 }
 
 void loop()

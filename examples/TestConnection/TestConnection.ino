@@ -25,8 +25,6 @@ void setup()
 
   bool communicating = tmc429.communicating();
   Serial << "communicating: " << communicating << "\n";
-
-  tmc429.initialize();
 }
 
 void loop()

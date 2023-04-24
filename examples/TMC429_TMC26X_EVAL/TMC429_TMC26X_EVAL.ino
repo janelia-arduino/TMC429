@@ -33,8 +33,6 @@ void setup()
   bool communicating = step_dir_controller.communicating();
   Serial << "communicating: " << communicating << "\n";
 
-  step_dir_controller.initialize();
-
   const int microsteps_per_rev = STEPS_PER_REV*MICROSTEPS_PER_STEP;
   velocity_max = microsteps_per_rev*REVS_PER_SEC_MAX;
   velocity_inc = microsteps_per_rev/INC_PER_REV;

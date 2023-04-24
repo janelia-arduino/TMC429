@@ -50,7 +50,6 @@ void setup()
   ledcWrite(0, 1);
 
   tmc429.setup(CHIP_SELECT_PIN, CLOCK_FREQUENCY_MHZ);
-  tmc429.initialize();
 }
 
 void loop()

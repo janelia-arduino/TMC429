@@ -18,8 +18,6 @@ public:
   bool communicating();
   uint32_t getVersion();
 
-  void initialize();
-
   void setRampMode(size_t motor);
   void setSoftMode(size_t motor);
   void setVelocityMode(size_t motor);
@@ -340,6 +338,8 @@ private:
   };
 
   size_t chip_select_pin_;
+
+  void initialize();
 
   void setStepDirOutput();
   // void setSpiOutput();
