@@ -2,7 +2,7 @@
 #include <TMC429.h>
 
 const long SERIAL_BAUD_RATE = 115200;
-const int LOOP_DELAY = 500;
+const int LOOP_DELAY = 4000;
 
 // Stepper driver settings
 HardwareSerial & serial_stream = Serial1;
@@ -18,19 +18,13 @@ TMC2209 stepper_driver;
 const int CHIP_SELECT_PIN = 10;
 const int CLOCK_FREQUENCY_MHZ = 32;
 const int MOTOR_INDEX = 0;
-const int STEPS_PER_REV = 200;
-const int REVS_PER_SEC_MAX = 2;
-const int MICROSTEPS_PER_REV = STEPS_PER_REV*MICROSTEPS_PER_STEP;
-const int ACCELERATION_MAX = MICROSTEPS_PER_REV / 8;
-const long VELOCITY_MAX = REVS_PER_SEC_MAX * MICROSTEPS_PER_REV;
-const long VELOCITY_MIN = 50;
-const long VELOCITY_INC = 5000;
+const long VELOCITY_MAX = 1000;
+const long VELOCITY_INC = 100;
 
 // Instantiate stepper controller
 TMC429 stepper_controller;
 
-long target_velocity, actual_velocity;
-bool at_target_velocity;
+long hold_velocity, actual_velocity, delta_velocity;
 
 void setup()
 {
@@ -45,40 +39,34 @@ void setup()
   stepper_controller.setup(CHIP_SELECT_PIN, CLOCK_FREQUENCY_MHZ);
   stepper_controller.disableLeftSwitchStop(MOTOR_INDEX);
   stepper_controller.disableRightSwitches();
-  stepper_controller.setVelocityMode(MOTOR_INDEX);
-  stepper_controller.setLimitsInHz(MOTOR_INDEX, VELOCITY_MIN, VELOCITY_MAX, ACCELERATION_MAX);
+  stepper_controller.setHoldMode(MOTOR_INDEX);
 
   stepper_driver.enable();
 
-  target_velocity = VELOCITY_INC;
-  stepper_controller.setTargetVelocityInHz(MOTOR_INDEX, target_velocity);
+  hold_velocity = 0;
+  delta_velocity = VELOCITY_INC;
+  stepper_controller.setHoldVelocity(MOTOR_INDEX, hold_velocity);
 }
 
 void loop()
 {
   Serial.println("********************");
-  Serial.println("Velocity Mode");
+  Serial.println("Hold Mode");
 
-  Serial.print("target_velocity: ");
-  Serial.println(target_velocity);
+  Serial.print("hold_velocity: ");
+  Serial.println(hold_velocity);
 
-  actual_velocity = stepper_controller.getActualVelocityInHz(MOTOR_INDEX);
+  actual_velocity = stepper_controller.getActualVelocity(MOTOR_INDEX);
   Serial.print("actual_velocity: ");
   Serial.println(actual_velocity);
 
-  at_target_velocity = stepper_controller.atTargetVelocity(MOTOR_INDEX);
-  Serial.print("at target_velocity: ");
-  Serial.println(at_target_velocity);
-
-  if (at_target_velocity)
+  hold_velocity += delta_velocity;
+  if ((hold_velocity > VELOCITY_MAX) || (hold_velocity < -VELOCITY_MAX))
   {
-    target_velocity += VELOCITY_INC;
-    if (target_velocity > VELOCITY_MAX)
-    {
-      target_velocity = VELOCITY_INC;
-    }
-    stepper_controller.setTargetVelocityInHz(MOTOR_INDEX, target_velocity);
+    hold_velocity = 0;
+    delta_velocity = -VELOCITY_INC;
   }
+  stepper_controller.setHoldVelocity(MOTOR_INDEX, hold_velocity);
 
   delay(LOOP_DELAY);
 }

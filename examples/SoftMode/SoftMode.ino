@@ -48,7 +48,7 @@ void setup()
   stepper_controller.disableRightSwitches();
   stepper_controller.disableRightSwitchStop(MOTOR_INDEX);
   stepper_controller.setLimitsInHz(MOTOR_INDEX, VELOCITY_MIN, VELOCITY_MAX, ACCELERATION_MAX);
-  stepper_controller.setRampMode(MOTOR_INDEX);
+  stepper_controller.setSoftMode(MOTOR_INDEX);
 
   stepper_controller.setActualPosition(MOTOR_INDEX, ZERO_POSITION);
   stepper_controller.setTargetPosition(MOTOR_INDEX, ZERO_POSITION);
@@ -59,7 +59,7 @@ void setup()
 void loop()
 {
   Serial.println("********************");
-  Serial.println("Ramp Mode");
+  Serial.println("Soft Mode");
 
   actual_position = stepper_controller.getActualPosition(MOTOR_INDEX);
   Serial.print("actual position: ");

@@ -20,6 +20,7 @@ public:
 
   void setRampMode(size_t motor);
   void setSoftMode(size_t motor);
+  void setHoldMode(size_t motor);
   void setVelocityMode(size_t motor);
 
   void setLimitsInHz(size_t motor,
@@ -34,9 +35,15 @@ public:
   int32_t getTargetVelocityInHz(size_t motor);
   void setTargetVelocityInHz(size_t motor,
     int32_t velocity_hz);
+  int16_t getTargetVelocity(size_t motor);
+  void setTargetVelocity(size_t motor,
+    int16_t velocity);
   bool atTargetVelocity(size_t motor);
 
   int32_t getActualVelocityInHz(size_t motor);
+  int16_t getActualVelocity(size_t motor);
+  void setHoldVelocity(size_t motor,
+    int16_t velocity);
 
   uint32_t getAccelerationMaxUpperLimitInHzPerS(uint32_t velocity_max_hz);
   uint32_t getAccelerationMaxLowerLimitInHzPerS(uint32_t velocity_max_hz);
@@ -195,15 +202,15 @@ private:
   // MOSI Datagrams
   union MosiDatagram
   {
-    struct Fields
+    struct
     {
       uint32_t data : 24;
       uint32_t rw : 1;
       uint32_t address : 4;
       uint32_t smda : 2;
       uint32_t rrs : 1;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   const static uint8_t RW_READ = 1;
   const static uint8_t RW_WRITE = 0;
@@ -247,12 +254,12 @@ private:
   // MISO Datagrams
   union MisoDatagram
   {
-    struct Fields
+    struct
     {
       uint32_t data : 24;
       Status status;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
 
   // Masks
@@ -266,19 +273,19 @@ private:
   // Union Structs
   union PropFactor
   {
-    struct Fields
+    struct
     {
       uint32_t pdiv : 4;
       uint32_t space0 : 4;
       uint32_t pmul : 8;
       uint32_t space1 : 8;
       uint32_t space2 : 8;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   union RefConfMode
   {
-    struct Fields
+    struct
     {
       uint32_t mode : 2;
       uint32_t space0 : 6;
@@ -286,30 +293,30 @@ private:
       uint32_t lp : 1;
       uint32_t space1 : 7;
       uint32_t space2 : 8;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   union IfConf
   {
-    struct Fields
+    struct
     {
       InterfaceConfiguration if_conf;
       uint32_t space0 : 16;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   union SwState
   {
-    struct Fields
+    struct
     {
       SwitchState switch_state;
       uint32_t space0 : 16;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   union GlobalParameters
   {
-    struct Fields
+    struct
     {
       uint32_t lsmd : 2;
       uint32_t nscs_s : 1;
@@ -324,17 +331,17 @@ private:
       uint32_t ref_mux : 1;
       uint32_t mot1r : 1;
       uint32_t space1 : 2;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
   union ClkConfig
   {
-    struct Fields
+    struct
     {
       ClockConfiguration clk_config;
       uint32_t space0 : 16;
-    } fields;
-    uint32_t uint32;
+    };
+    uint32_t bytes;
   };
 
   size_t chip_select_pin_;
@@ -387,12 +394,6 @@ private:
   uint16_t getVelocityMax(size_t motor);
   void setVelocityMaxInHz(size_t motor,
     uint32_t velocity_max_hz);
-
-  int16_t getTargetVelocity(size_t motor);
-  void setTargetVelocity(size_t motor,
-    int16_t velocity);
-
-  int16_t getActualVelocity(size_t motor);
 
   uint32_t convertAccelerationToHzPerS(uint8_t pulse_div,
     uint8_t ramp_div,
