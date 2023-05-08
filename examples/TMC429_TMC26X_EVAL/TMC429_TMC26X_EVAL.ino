@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <Streaming.h>
 #include <TMC429.h>
 
 
@@ -31,7 +28,8 @@ void setup()
   step_dir_controller.setup(CHIP_SELECT_PIN_429,CLOCK_FREQUENCY_MHZ);
 
   bool communicating = step_dir_controller.communicating();
-  Serial << "communicating: " << communicating << "\n";
+  Serial.print("communicating: ");
+  Serial.println(communicating);
 
   const int microsteps_per_rev = STEPS_PER_REV*MICROSTEPS_PER_STEP;
   velocity_max = microsteps_per_rev*REVS_PER_SEC_MAX;
@@ -54,25 +52,29 @@ void loop()
   if (target_velocity > velocity_max)
   {
     step_dir_controller.stop(MOTOR);
-    Serial << "stopping motor!\n";
+    Serial.println("stopping motor!");
     delay(LOOP_DELAY*5);
 
     target_velocity = -velocity_max;
   }
   step_dir_controller.setTargetVelocityInHz(MOTOR,target_velocity);
-  Serial << "set target_velocity: " << target_velocity << "\n";
-  Serial << "at target_velocity: " << step_dir_controller.atTargetVelocity(MOTOR) << "\n";
+  Serial.print("set target_velocity: ");
+  Serial.println(target_velocity);
+  Serial.print("at target_velocity: ");
+  Serial.println(step_dir_controller.atTargetVelocity(MOTOR));
 
   target_velocity = step_dir_controller.getTargetVelocityInHz(MOTOR);
 
   do
   {
     actual_velocity = step_dir_controller.getActualVelocityInHz(MOTOR);
-    Serial << "actual_velocity: " << actual_velocity << "\n";
+    Serial.print("actual_velocity: ");
+    Serial.println(actual_velocity);
     delay(LOOP_DELAY);
   }
   while (actual_velocity != target_velocity);
 
-  Serial << "at target_velocity: " << step_dir_controller.atTargetVelocity(MOTOR) << "\n";
-  Serial << "\n";
+  Serial.print("at target_velocity: ");
+  Serial.println(step_dir_controller.atTargetVelocity(MOTOR));
+  Serial.println();
 }

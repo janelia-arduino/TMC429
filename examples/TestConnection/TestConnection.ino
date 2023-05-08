@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <Streaming.h>
 #include <TMC429.h>
 
 
@@ -19,149 +16,150 @@ void setup()
   Serial.begin(BAUD);
 
   tmc429.setup(CHIP_SELECT_PIN,CLOCK_FREQUENCY_MHZ);
-
-  uint32_t version = tmc429.getVersion();
-  Serial << "version: " << _HEX(version) << "\n";
-
-  bool communicating = tmc429.communicating();
-  Serial << "communicating: " << communicating << "\n";
 }
 
 void loop()
 {
   bool communicating = tmc429.communicating();
-  Serial << "communicating: " << communicating << "\n";
+  Serial.print("communicating: ");
+  Serial.println(communicating);
+
+  uint32_t version = tmc429.getVersion();
+  Serial.print("version: ");
+  Serial.println(version, HEX);
 
   tmc429.setVelocityMode(MOTOR);
   // tmc429.setRampMode(MOTOR);
 
   uint32_t velocity_max_upper_limit = tmc429.getVelocityMaxUpperLimitInHz();
-  Serial << "velocity_max_upper_limit: " << velocity_max_upper_limit << "\n";
+  Serial.print("velocity_max_upper_limit: ");
+  Serial.println(velocity_max_upper_limit);
 
   uint32_t velocity_min = 100;
   uint32_t velocity_max = 100000;
   uint32_t acceleration_max = 40000;
   tmc429.setLimitsInHz(MOTOR,velocity_min,velocity_max,acceleration_max);
-  Serial << "setLimitsInHz: " << velocity_min << ", " << velocity_max << ", " << acceleration_max << "\n";
+  Serial.print("setLimitsInHz: ");
+  Serial.print(velocity_min);
+  Serial.print(", ");
+  Serial.print(velocity_max);
+  Serial.print(", ");
+  Serial.println(acceleration_max);
 
   acceleration_max = tmc429.getAccelerationMaxInHzPerS(MOTOR);
-  Serial << "acceleration_max: " << acceleration_max << "\n";
+  Serial.print("acceleration_max: ");
+  Serial.println(acceleration_max);
 
   acceleration_max = tmc429.getAccelerationMaxUpperLimitInHzPerS(MOTOR);
-  Serial << "acceleration_max_upper_limit: " << acceleration_max << "\n";
+  Serial.print("acceleration_max_upper_limit: ");
+  Serial.println(acceleration_max);
 
   uint32_t acceleration_actual = tmc429.getActualAccelerationInHzPerS(MOTOR);
-  Serial << "acceleration_actual: " << acceleration_actual << "\n";
+  Serial.print("acceleration_actual: ");
+  Serial.println(acceleration_actual);
 
   velocity_min = tmc429.getVelocityMinInHz(MOTOR);
-  Serial << "velocity_min: " << velocity_min << "\n";
+  Serial.print("velocity_min: ");
+  Serial.println(velocity_min);
 
   velocity_max = tmc429.getVelocityMaxInHz(MOTOR);
-  Serial << "velocity_max: " << velocity_max << "\n";
+  Serial.print("velocity_max: ");
+  Serial.println(velocity_max);
 
   long target_velocity = -50000;
   tmc429.setTargetVelocityInHz(MOTOR,target_velocity);
-  Serial << "set target_velocity: " << target_velocity << "\n";
+  Serial.print("set target_velocity: ");
+  Serial.println(target_velocity);
 
   target_velocity = tmc429.getTargetVelocityInHz(MOTOR);
-  Serial << "target_velocity: " << target_velocity << "\n";
+  Serial.print("target_velocity: ");
+  Serial.println(target_velocity);
 
   long actual_velocity = tmc429.getActualVelocityInHz(MOTOR);
-  Serial << "actual_velocity: " << actual_velocity << "\n";
+  Serial.print("actual_velocity: ");
+  Serial.println(actual_velocity);
 
   int32_t target_position = 12345;
   tmc429.setTargetPosition(MOTOR,target_position);
-  Serial << "set target_position: " << target_position << "\n";
+  Serial.print("set target_position: ");
+  Serial.println(target_position);
 
   target_position = tmc429.getTargetPosition(MOTOR);
-  Serial << "target_position: " << target_position << "\n";
+  Serial.print("set target_position: ");
+  Serial.println(target_position);
 
   int32_t actual_position = tmc429.getActualPosition(MOTOR);
-  Serial << "actual_position: " << actual_position << "\n";
+  Serial.print("actual_position: ");
+  Serial.println(actual_position);
 
-  Serial << "at_target_position = " << tmc429.atTargetPosition(MOTOR) << "\n";
-  Serial << "at_target_velocity = " << tmc429.atTargetVelocity(MOTOR) << "\n";
+  Serial.print("at_target_position = ");
+  Serial.println(tmc429.atTargetPosition(MOTOR));
+  Serial.print("at_target_velocity = ");
+  Serial.println(tmc429.atTargetVelocity(MOTOR));
 
   tmc429.disableRightSwitches();
-  Serial << "After disabling, right switches enabled = " << tmc429.rightSwitchesEnabled() << "\n";
+  Serial.print("After disabling, right switches enabled = ");
+  Serial.println(tmc429.rightSwitchesEnabled());
   tmc429.enableRightSwitches();
-  Serial << "After enabling, right switches enabled = " << tmc429.rightSwitchesEnabled() << "\n";
+  Serial.print("After enabling, right switches enabled = ");
+  Serial.println(tmc429.rightSwitchesEnabled());
   tmc429.setReferenceSwitchToLeft(MOTOR);
 
   tmc429.setSwitchesActiveLow();
   tmc429.disableSwitchSoftStop(MOTOR);
-  Serial << "After disabling, switch soft stop enabled = " << tmc429.switchSoftStopEnabled(MOTOR) << "\n";
+  Serial.print("After disabling, switch soft stop enabled = ");
+  Serial.println(tmc429.switchSoftStopEnabled(MOTOR));
   tmc429.enableSwitchSoftStop(MOTOR);
-  Serial << "After enabling, switch soft stop enabled = " << tmc429.switchSoftStopEnabled(MOTOR) << "\n";
+  Serial.print("After enabling, switch soft stop enabled = ");
+  Serial.println(tmc429.switchSoftStopEnabled(MOTOR));
 
   tmc429.disableLeftSwitchStop(MOTOR);
-  Serial << "After disabling, left switch stop enabled = " << tmc429.leftSwitchStopEnabled(MOTOR) << "\n";
+  Serial.print("After disabling, left switch stop enabled = ");
+  Serial.println(tmc429.leftSwitchStopEnabled(MOTOR));
   tmc429.enableLeftSwitchStop(MOTOR);
-  Serial << "After enabling, left switch stop enabled = " << tmc429.leftSwitchStopEnabled(MOTOR) << "\n";
+  Serial.print("After enabling, left switch stop enabled = ");
+  Serial.println(tmc429.leftSwitchStopEnabled(MOTOR));
 
   tmc429.disableRightSwitchStop(MOTOR);
-  Serial << "After disabling, right switch stop enabled = " << tmc429.rightSwitchStopEnabled(MOTOR) << "\n";
+  Serial.print("After disabling, right switch stop enabled = ");
+  Serial.println(tmc429.rightSwitchStopEnabled(MOTOR));
   tmc429.enableRightSwitchStop(MOTOR);
-  Serial << "After enabling, right switch stop enabled = " << tmc429.rightSwitchStopEnabled(MOTOR) << "\n";
+  Serial.print("After enabling, right switch stop enabled = ");
+  Serial.println(tmc429.rightSwitchStopEnabled(MOTOR));
 
-  Serial << "left_switch_active = " << tmc429.leftSwitchActive(MOTOR) << "\n";
-  Serial << "right_switch_active = " << tmc429.rightSwitchActive(MOTOR) << "\n";
+  Serial.print("left_switch_active = ");
+  Serial.println(tmc429.leftSwitchActive(MOTOR));
+  Serial.print("right_switch_active = ");
+  Serial.println(tmc429.rightSwitchActive(MOTOR));
 
   bool latch_position_waiting = tmc429.latchPositionWaiting(MOTOR);
-  Serial << "latch_position_waiting: " << latch_position_waiting << "\n";
+  Serial.print("latch_position_waiting: ");
+  Serial.println(latch_position_waiting);
   if (!latch_position_waiting)
   {
     int32_t latch_position = tmc429.getLatchPosition(MOTOR);
-    Serial << "latch_position: " << latch_position << "\n";
+    Serial.print("latch_position: ");
+    Serial.println(latch_position);
     tmc429.startLatchPositionWaiting(MOTOR);
   }
 
   tmc429.setPositionCompareMotor(MOTOR);
 
   TMC429::Status status = tmc429.getStatus();
-  Serial << "status.at_target_position_0 = " << status.at_target_position_0 << "\n";
-  Serial << "status.switch_left_0 = " << status.switch_left_0 << "\n";
-  Serial << "status.at_target_position_1 = " << status.at_target_position_1 << "\n";
-  Serial << "status.switch_left_1 = " << status.switch_left_1 << "\n";
-  Serial << "status.at_target_position_2 = " << status.at_target_position_2 << "\n";
-  Serial << "status.switch_left_2 = " << status.switch_left_2 << "\n";
+  Serial.print("status.at_target_position_0 = ");
+  Serial.println(status.at_target_position_0);
+  Serial.print("status.switch_left_0 = ");
+  Serial.println(status.switch_left_0);
+  Serial.print("status.at_target_position_1 = ");
+  Serial.println(status.at_target_position_1);
+  Serial.print("status.switch_left_1 = ");
+  Serial.println(status.switch_left_1);
+  Serial.print("status.at_target_position_2 = ");
+  Serial.println(status.at_target_position_2);
+  Serial.print("status.switch_left_2 = ");
+  Serial.println(status.switch_left_2);
 
-  // test private methods:
-  // TMC429::ReferenceConfiguration ref_conf = tmc429.getReferenceConfiguration(MOTOR);
-  // Serial << "ref_conf.disable_stop_l: " << ref_conf.disable_stop_l << "\n";
-  // Serial << "ref_conf.disable_stop_r: " << ref_conf.disable_stop_r << "\n";
-  // Serial << "ref_conf.soft_stop: " << ref_conf.soft_stop << "\n";
-  // Serial << "ref_conf.ref_rnl: " << ref_conf.ref_rnl << "\n";
 
-  // TMC429::InterfaceConfiguration if_conf = tmc429.getInterfaceConfiguration();
-  // Serial << "if_conf.inv_ref: " << if_conf.inv_ref << "\n";
-  // Serial << "if_conf.sdo_int: " << if_conf.sdo_int << "\n";
-  // Serial << "if_conf.step_half: " << if_conf.step_half << "\n";
-  // Serial << "if_conf.inv_stp: " << if_conf.inv_stp << "\n";
-  // Serial << "if_conf.inv_dir: " << if_conf.inv_dir << "\n";
-  // Serial << "if_conf.en_sd: " << if_conf.en_sd << "\n";
-  // Serial << "if_conf.pos_comp_sel: " << if_conf.pos_comp_sel << "\n";
-  // Serial << "if_conf.en_refr: " << if_conf.en_refr << "\n";
-
-  // TMC429::SwitchState switch_state = tmc429.getSwitchState();
-  // Serial << "switch_state.r0: " << switch_state.r0 << "\n";
-  // Serial << "switch_state.l0: " << switch_state.l0 << "\n";
-  // Serial << "switch_state.r1: " << switch_state.r1 << "\n";
-  // Serial << "switch_state.l1: " << switch_state.l1 << "\n";
-  // Serial << "switch_state.r2: " << switch_state.r2 << "\n";
-  // Serial << "switch_state.l2: " << switch_state.l2 << "\n";
-
-  // TMC429::ClockConfiguration clk_config = tmc429.getClockConfiguration(MOTOR);
-  // Serial << "clk_config.usrs: " << clk_config.usrs << "\n";
-  // Serial << "clk_config.ramp_div: " << clk_config.ramp_div << "\n";
-  // Serial << "clk_config.pulse_div: " << clk_config.pulse_div << "\n";
-
-  // double proportionality_factor = tmc429.getProportionalityFactor(MOTOR);
-  // Serial << "proportionality_factor: " << proportionality_factor << "\n";
-
-  // double step_time = tmc429.getStepTimeInMicroS();
-  // Serial << "step_time: " << step_time << "\n";
-
-  Serial << "\n";
+  Serial.println();
   delay(LOOP_DELAY);
 }

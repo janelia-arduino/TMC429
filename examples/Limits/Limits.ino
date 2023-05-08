@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <Streaming.h>
 #include <TMC429.h>
 
 
@@ -38,10 +35,15 @@ void loop()
   {
     acceleration_upper_limit = tmc429.getAccelerationMaxUpperLimitInHzPerS(velocity * STEPS_PER_POSITION_UNITS) / STEPS_PER_POSITION_UNITS;
     acceleration_lower_limit = tmc429.getAccelerationMaxLowerLimitInHzPerS(velocity * STEPS_PER_POSITION_UNITS) / STEPS_PER_POSITION_UNITS;
-    Serial << "velocity = " << velocity << ", acceleration_upper_limit = " << acceleration_upper_limit<< ", acceleration_lower_limit = " << acceleration_lower_limit << "\n";
+    Serial.print("velocity = ");
+    Serial.print(velocity);
+    Serial.print(", acceleration_upper_limit = ");
+    Serial.print(acceleration_upper_limit);
+    Serial.print(", acceleration_lower_limit = ");
+    Serial.println(acceleration_lower_limit);
     velocity += VELOCITY_INC;
   }
 
-  Serial << "\n";
+  Serial.println();
   delay(LOOP_DELAY);
 }

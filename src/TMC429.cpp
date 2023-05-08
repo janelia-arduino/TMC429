@@ -693,15 +693,9 @@ int32_t TMC429::convertVelocityToHz(uint8_t pulse_div,
 int16_t TMC429::convertVelocityFromHz(uint8_t pulse_div,
   int32_t velocity)
 {
-  Serial.print("pulse_div: ");
-  Serial.print(pulse_div);
-  Serial.print(", velocity Hz: ");
-  Serial.print(velocity);
   // (velocity*(1 << pulse_div)*VELOCITY_CONSTANT)/(clock_frequency_*MHZ_PER_HZ);
   double x = ((double)velocity*(double)(1 << pulse_div))/((double)clock_frequency_*(double)MHZ_PER_HZ);
   double y = x*(double)VELOCITY_CONSTANT;
-  Serial.print(", converted velocity: ");
-  Serial.print(y);
   return y;
 }
 
