@@ -179,6 +179,31 @@ int16_t TMC429::getActualVelocity(size_t motor)
   return unsignedToSigned(velocity_unsigned, V_BIT_COUNT);
 }
 
+void TMC429::setHoldVelocityMaxInHz(size_t motor,
+  uint32_t velocity_max_hz)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+
+  setOptimalStepDivHz(velocity_max_hz);
+
+  setOptimalPulseDivHz(motor, velocity_max_hz);
+
+  setVelocityMaxInHz(motor, velocity_max_hz);
+}
+
+void TMC429::setHoldVelocityInHz(size_t motor,
+  int32_t velocity_hz)
+{
+  if (motor >= MOTOR_COUNT)
+  {
+    return;
+  }
+  setHoldVelocity(motor, convertVelocityFromHz(pulse_div_[motor], velocity_hz));
+}
+
 void TMC429::setHoldVelocity(size_t motor,
   int16_t velocity)
 {

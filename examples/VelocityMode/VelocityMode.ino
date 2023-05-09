@@ -70,10 +70,6 @@ void loop()
   Serial.print("actual velocity (Hz): ");
   Serial.println(actual_velocity);
 
-  actual_velocity = stepper_controller.getActualVelocity(MOTOR_INDEX);
-  Serial.print("actual velocity: ");
-  Serial.println(actual_velocity);
-
   at_target_velocity = stepper_controller.atTargetVelocity(MOTOR_INDEX);
   Serial.print("at target velocity: ");
   Serial.println(at_target_velocity);
