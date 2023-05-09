@@ -2,6 +2,7 @@
 #include <TMC429.h>
 
 const long SERIAL_BAUD_RATE = 115200;
+const int SETUP_DELAY = 4000;
 const int LOOP_DELAY = 500;
 
 // Stepper driver settings
@@ -29,7 +30,7 @@ const long VELOCITY_INC = 5000;
 // Instantiate stepper controller
 TMC429 stepper_controller;
 
-long target_velocity, actual_velocity;
+long target_velocity, actual_velocity, delta_velocity;
 bool at_target_velocity;
 
 void setup()
@@ -50,8 +51,11 @@ void setup()
 
   stepper_driver.enable();
 
-  target_velocity = VELOCITY_INC;
+  target_velocity = 0;
+  delta_velocity = VELOCITY_INC;
   stepper_controller.setTargetVelocityInHz(MOTOR_INDEX, target_velocity);
+
+  delay(SETUP_DELAY);
 }
 
 void loop()
@@ -59,26 +63,31 @@ void loop()
   Serial.println("********************");
   Serial.println("Velocity Mode");
 
-  Serial.print("target_velocity: ");
+  Serial.print("target velocity (Hz): ");
   Serial.println(target_velocity);
 
   actual_velocity = stepper_controller.getActualVelocityInHz(MOTOR_INDEX);
-  Serial.print("actual_velocity: ");
+  Serial.print("actual velocity (Hz): ");
+  Serial.println(actual_velocity);
+
+  actual_velocity = stepper_controller.getActualVelocity(MOTOR_INDEX);
+  Serial.print("actual velocity: ");
   Serial.println(actual_velocity);
 
   at_target_velocity = stepper_controller.atTargetVelocity(MOTOR_INDEX);
-  Serial.print("at target_velocity: ");
+  Serial.print("at target velocity: ");
   Serial.println(at_target_velocity);
+
+  delay(LOOP_DELAY);
 
   if (at_target_velocity)
   {
-    target_velocity += VELOCITY_INC;
-    if (target_velocity > VELOCITY_MAX)
+    target_velocity += delta_velocity;
+    if ((target_velocity > VELOCITY_MAX) || (target_velocity < -VELOCITY_MAX))
     {
-      target_velocity = VELOCITY_INC;
+      delta_velocity = -delta_velocity;
+      target_velocity += 2* delta_velocity;
     }
     stepper_controller.setTargetVelocityInHz(MOTOR_INDEX, target_velocity);
   }
-
-  delay(LOOP_DELAY);
 }

@@ -42,6 +42,7 @@ public:
 
   int32_t getActualVelocityInHz(size_t motor);
   int16_t getActualVelocity(size_t motor);
+
   void setHoldVelocity(size_t motor,
     int16_t velocity);
 
