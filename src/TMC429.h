@@ -173,7 +173,7 @@ private:
 
   // SPISettings
   const static uint32_t SPI_CLOCK = 1000000;
-#if defined(ARDUINO_ARCH_SAMD)
+#if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_RENESAS)
   const static BitOrder SPI_BIT_ORDER = MSBFIRST;
 #else
   const static uint8_t SPI_BIT_ORDER = MSBFIRST;
