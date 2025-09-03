@@ -1139,16 +1139,16 @@ void TMC429::disableChipSelect()
 
 void TMC429::beginTransaction()
 {
-  enableChipSelect();
-  delayMicroseconds(1);
   spiBeginTransaction(SPISettings(SPI_CLOCK, SPI_BIT_ORDER, SPI_MODE));
+  delayMicroseconds(1);
+  enableChipSelect();
 }
 
 void TMC429::endTransaction()
 {
-  spiEndTransaction();
-  delayMicroseconds(1);
   disableChipSelect();
+  delayMicroseconds(1);
+  spiEndTransaction();
 }
 
 void TMC429::spiBegin()
